@@ -1,0 +1,11 @@
+# Render service configuration to ensure the correct root directory
+services:
+  - type: web
+    name: backend
+    env: node
+    # rootDir is relative to this file's location (project root)
+    rootDir: server
+    buildCommand: cd server && npm install
+    startCommand: node index.js
+    # optional: choose a plan if desired
+    plan: free
