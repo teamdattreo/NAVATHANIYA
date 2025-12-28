@@ -18,13 +18,27 @@ export const createCategory = (category) => {
 };
 
 export const getCategories = () => {
-  return fetch(`${API}/categories`, {
+  const url = `${API}/categories`;
+  console.log('Fetching categories from:', url);
+  return fetch(url, {
     method: "GET",
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
   })
     .then((response) => {
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       return response.json();
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.error('Error fetching categories:', err);
+      throw err;
+    });
 };
 
 export const createProduct = (product) => {
