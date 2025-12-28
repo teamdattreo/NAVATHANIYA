@@ -83,6 +83,19 @@ app.use("/api", categoryRoutes);
 app.use("/api", productRoutes);
 app.use("/api/admin", adminRoutes);
 
+// Root route for testing
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "NAVATHANIYA API Server is running!",
+    status: "Active",
+    endpoints: {
+      categories: "/api/category",
+      products: "/api/product",
+      admin: "/api/admin"
+    }
+  });
+});
+
 if (process.env.NODE_ENV == "production") {
   app.use(express.static("client/build"));
 }
