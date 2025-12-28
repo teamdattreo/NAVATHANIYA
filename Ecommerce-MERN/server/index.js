@@ -65,7 +65,7 @@ const corsOptions = {
     
     const allowedOrigins = process.env.FRONTEND_URL 
       ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-      : ['http://localhost:3000', 'http://localhost:3001'];
+      : ['http://localhost:3000', 'http://localhost:3001', 'https://navathaniya.vercel.app', 'https://navathaniya.onrender.com'];
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
