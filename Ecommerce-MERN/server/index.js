@@ -9,7 +9,7 @@ const adminRoutes = require("./routes/admin");
 const { v2: cloudinary } = require("cloudinary");
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 
 const MONGODB_URI =
   process.env.MONGODB_URI ||
@@ -64,14 +64,20 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = process.env.FRONTEND_URL 
-      ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-      : ['http://localhost:3000', 'http://localhost:3001'];
-    
     // Allow all Vercel subdomains
     if (origin.includes('vercel.app') || origin.includes('vercel.com')) {
       return callback(null, true);
     }
+    
+    // Allow localhost for development
+    if (origin.includes('localhost')) {
+      return callback(null, true);
+    }
+    
+    // Allow the specific frontend URL
+    const allowedOrigins = process.env.FRONTEND_URL 
+      ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+      : ['http://localhost:3000', 'http://localhost:3001'];
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);

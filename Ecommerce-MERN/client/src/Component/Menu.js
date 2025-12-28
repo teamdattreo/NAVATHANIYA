@@ -19,7 +19,7 @@ const Menu = ({ history }) => {
             <div className="brand-icon-wrapper me-2">
               <i className="bi bi-shop"></i>
             </div>
-            <span className="brand-text">GENERAL STORE</span>
+            <span className="brand-text">NAVATHANIYA</span>
           </Link>
           
           {/* Mobile toggle */}
@@ -28,8 +28,30 @@ const Menu = ({ history }) => {
           </button>
 
           <div className="collapse navbar-collapse" id="navbarNav">
-            {/* Left Navigation - Admin Login */}
-            <div className="me-auto d-flex align-items-center">
+            {/* Center Navigation */}
+            <ul className="navbar-nav mx-auto">
+              <li className="nav-item">
+                <Link className="nav-link" to="/">
+                  <i className="bi bi-house-door me-1"></i>
+                  <span>Home</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/products">
+                  <i className="bi bi-box me-1"></i>
+                  <span>Products</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/contact">
+                  <i className="bi bi-envelope me-1"></i>
+                  <span>Contact</span>
+                </Link>
+              </li>
+            </ul>
+            
+            {/* Right Navigation - Admin Login */}
+            <div className="d-flex align-items-center">
               {user && isAdmin() ? (
                 <>
                   <div className="dropdown me-3">
@@ -82,72 +104,6 @@ const Menu = ({ history }) => {
                   <span>Admin Login</span>
                 </Link>
               )}
-            </div>
-            
-            {/* Center Navigation */}
-            <ul className="navbar-nav mx-auto">
-              <li className="nav-item">
-                <Link className="nav-link" to="/">
-                  <i className="bi bi-house-door me-1"></i>
-                  <span>Home</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/products">
-                  <i className="bi bi-box me-1"></i>
-                  <span>Products</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/garments">
-                  <i className="bi bi-bag me-1"></i>
-                  <span>Garments</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/kitchen">
-                  <i className="bi bi-cup-hot me-1"></i>
-                  <span>Kitchen</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/traditional">
-                  <i className="bi bi-star me-1"></i>
-                  <span>Traditional</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/blog">
-                  <i className="bi bi-journal-text me-1"></i>
-                  <span>Blog</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/resources">
-                  <i className="bi bi-book me-1"></i>
-                  <span>Resources</span>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/contact">
-                  <i className="bi bi-envelope me-1"></i>
-                  <span>Contact</span>
-                </Link>
-              </li>
-            </ul>
-            
-            {/* Right Navigation */}
-            <div className="d-flex align-items-center">
-              <button className="btn btn-link nav-icon-btn me-3">
-                <i className="bi bi-search"></i>
-              </button>
-              <button className="btn btn-link nav-icon-btn me-3 position-relative">
-                <i className="bi bi-cart3"></i>
-                <span className="cart-badge">0</span>
-              </button>
-              <button className="btn btn-sign-up">
-                Sign Up
-              </button>
             </div>
           </div>
         </div>

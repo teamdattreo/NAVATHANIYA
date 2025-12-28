@@ -349,506 +349,225 @@ const Home = () => {
     <Layout
       title="ShopHub - Online Shopping"
       description="Find everything you need at great prices"
-      className="container-fluid px-0"
+      className="container-fluid"
     >
       <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 1;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .hero-section {
-          background: linear-gradient(135deg, rgba(46, 125, 50, 0.9) 0%, rgba(56, 142, 60, 0.9) 50%, rgba(67, 160, 71, 0.9) 100%),
-                      url('/img/hero-bg.jpg') center/cover;
-          color: white;
-          padding: 6rem 0;
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .hero-content {
-          position: relative;
-          z-index: 2;
-        }
-        
-        .brand-title {
-          font-size: 4rem;
-          font-weight: 800;
-          margin-bottom: 0.5rem;
-          text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-          letter-spacing: 2px;
-          color: #ffffff;
-        }
-        
-        .brand-subtitle {
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin-bottom: 2rem;
-          opacity: 0.95;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .hero-description {
-          font-size: 1.2rem;
-          opacity: 0.90;
-          margin-bottom: 2.5rem;
-          line-height: 1.6;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-        
-        .btn-shop-now {
-          background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-          border: none;
-          color: white;
-          font-weight: 700;
-          padding: 1rem 2.5rem;
-          border-radius: 50px;
-          box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-          transition: all 0.3s ease;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-        
-        .btn-shop-now:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-          background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
-          color: white;
-        }
-        
-        .hero-image-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          gap: 1rem;
-          height: 400px;
-        }
-        
-        .hero-image-item {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 15px;
+        .shop-container {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          overflow: hidden;
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          transition: all 0.3s ease;
+          gap: 2rem;
+          padding: 2rem;
         }
         
-        .hero-image-item:hover {
-          transform: translateY(-5px);
-          background: rgba(255, 255, 255, 0.15);
+        .sidebar {
+          width: 250px;
+          background: #f8f9fa;
+          padding: 1.5rem;
+          border-radius: 8px;
+          height: fit-content;
         }
         
-        .hero-image-item.left {
-          background: linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(247, 147, 30, 0.3) 100%);
-        }
-        
-        .hero-image-item.middle {
-          background: linear-gradient(135deg, rgba(69, 183, 209, 0.3) 0%, rgba(78, 205, 196, 0.3) 100%);
-        }
-        
-        .hero-image-item.right {
-          background: linear-gradient(135deg, rgba(247, 183, 49, 0.3) 0%, rgba(255, 193, 7, 0.3) 100%);
-        }
-        
-        .image-overlay {
-          text-align: center;
-          z-index: 2;
-        }
-        
-        .image-overlay i {
-          font-size: 3rem;
-          display: block;
+        .sidebar h3 {
+          color: #2c3e50;
           margin-bottom: 1rem;
-          color: white;
-        }
-        
-        .image-overlay span {
-          font-size: 1.2rem;
           font-weight: 600;
-          color: white;
-          text-transform: uppercase;
-          letter-spacing: 1px;
         }
         
-        .category-card {
-          background: white;
-          border-radius: 1rem;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-          border: 1px solid #f0f0f0;
-          transition: all 0.3s ease;
-          cursor: pointer;
-        }
-        
-        .category-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(46, 125, 50, 0.15);
-        }
-        
-        .category-icon {
-          width: 60px;
-          height: 60px;
-          background: #f8f9fa;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto;
-        }
-        
-        .category-title {
-          font-weight: 600;
-          color: #2c3e50;
-          font-size: 1.5rem;
-        }
-        
-        .category-subtitle {
-          font-size: 0.875rem;
-          line-height: 1.4;
-        }
-        
-        .category-section {
-          background: white;
-          border-radius: 1rem;
-          padding: 2rem;
-          margin-bottom: 2rem;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .category-divider {
-          height: 2px;
-          background: linear-gradient(90deg, #2E7D32 0%, #43A047 100%);
-          border-radius: 1px;
-          margin-top: 1rem;
-        }
-        
-        .category-badge .badge {
-          font-size: 1rem;
-          padding: 0.5rem 1rem;
-        }
-        
-        .pagination-controls {
-          margin-top: 2rem;
-        }
-        
-        .page-numbers .btn {
-          min-width: 40px;
-          height: 40px;
+        .category-list {
+          list-style: none;
           padding: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
         }
         
-        .pagination-controls .btn:disabled {
-          opacity: 1;
-          cursor: not-allowed;
-        }
-        
-        .category-filter {
-          background: white;
-          border-radius: 1rem;
-          padding: 2rem;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-          margin-bottom: 3rem;
-        }
-        
-        .filter-title {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #2c3e50;
+        .category-item {
+          padding: 0.75rem;
           margin-bottom: 0.5rem;
-        }
-        
-        .category-filter-btn {
-          background: #f8f9fa;
-          border: 2px solid #e9ecef;
-          border-radius: 2rem;
-          padding: 0.75rem 1.5rem;
-          font-weight: 500;
-          transition: all 0.3s ease;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: background 0.3s;
           display: flex;
+          justify-content: space-between;
           align-items: center;
         }
         
-        .category-filter-btn:hover {
+        .category-item:hover {
           background: #e9ecef;
-          border-color: #2E7D32;
-          transform: translateY(-2px);
         }
         
-        .category-filter-btn.active {
-          background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
-          border-color: #2E7D32;
+        .category-item.active {
+          background: #2E7D32;
           color: white;
         }
         
-        .category-filter-btn .badge {
-          background: rgba(255,255,255,0.2);
-          color: inherit;
+        .category-count {
+          background: rgba(46, 125, 50, 0.1);
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.875rem;
         }
         
-        .category-filter-btn.active .badge {
-          background: rgba(255,255,255,0.3);
-          color: white;
+        .category-item.active .category-count {
+          background: rgba(255, 255, 255, 0.2);
         }
         
-        .products-section {
-          padding: 3rem 0;
-          background: #f8f9fa;
+        .main-content {
+          flex: 1;
         }
         
         .section-header {
           text-align: center;
-          margin-bottom: 3rem;
+          margin-bottom: 2rem;
         }
         
         .section-title {
-          font-size: 2.5rem;
-          font-weight: 700;
+          font-size: 2rem;
+          font-weight: 600;
           color: #2c3e50;
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
         }
         
-        .section-subtitle {
-          font-size: 1.1rem;
-          color: #6c757d;
+        .category-section {
+          margin-bottom: 3rem;
         }
         
-        .search-bar {
-          max-width: 600px;
-          margin: 0 auto 3rem;
+        .category-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #2E7D32;
+        }
+        
+        .category-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          margin: 0;
+        }
+        
+        .product-count {
+          background: #2E7D32;
+          color: white;
+          padding: 0.25rem 0.75rem;
+          border-radius: 15px;
+          font-size: 0.875rem;
+          margin-left: 1rem;
+        }
+        
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1.5rem;
+        }
+        
+        .search-section {
+          text-align: center;
+          padding: 2rem;
+          background: #f8f9fa;
+          border-radius: 8px;
+          margin-top: 2rem;
         }
         
         .search-input {
-          border-radius: 2rem;
-          padding: 1rem 1.5rem;
+          width: 100%;
+          max-width: 400px;
+          padding: 0.75rem 1rem;
           border: 2px solid #e9ecef;
+          border-radius: 25px;
           font-size: 1rem;
         }
         
         .search-input:focus {
+          outline: none;
           border-color: #2E7D32;
-          box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
-        }
-        
-        @media (max-width: 768px) {
-          .hero-section {
-            padding: 3rem 0;
-          }
-          
-          .hero-title {
-            font-size: 2.5rem !important;
-          }
-          
-          .hero-subtitle {
-            font-size: 1rem !important;
-          }
         }
       `}</style>
       
-      {/* Hero Section */}
-      <div className="hero-section">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6">
-              <div className="hero-content">
-                <div className="brand-logo mb-4">
-                  <h1 className="brand-title">GENERAL STORE</h1>
-                  <p className="brand-subtitle">Your One-Stop Shop for Home & Tradition</p>
-                </div>
-                <p className="hero-description">
-                  From Garments & Gadgets to Pooja Essentials. Explore Our Diverse Collection.
-                </p>
-                <div className="hero-buttons">
-                  <button className="btn btn-shop-now btn-lg">
-                    <i className="bi bi-cart3 me-2"></i>
-                    SHOP NOW
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-6">
-              <div className="hero-image-grid">
-                <div className="hero-image-item left">
-                  <div className="image-overlay">
-                    <i className="bi bi-bag-heart"></i>
-                    <span>Garments</span>
-                  </div>
-                </div>
-                <div className="hero-image-item middle">
-                  <div className="image-overlay">
-                    <i className="bi bi-cup-hot"></i>
-                    <span>Kitchen</span>
-                  </div>
-                </div>
-                <div className="hero-image-item right">
-                  <div className="image-overlay">
-                    <i className="bi bi-star"></i>
-                    <span>Traditional</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="shop-container">
+        {/* Sidebar */}
+        <div className="sidebar">
+          <h3>Filter by Category</h3>
+          <ul className="category-list">
+            <li 
+              className={`category-item ${selectedCategory === "all" ? "active" : ""}`}
+              onClick={() => setSelectedCategory("all")}
+            >
+              <span>All Categories</span>
+              <span className="category-count">{allProducts.length}</span>
+            </li>
+            {Object.entries(productsByCategory)
+              .filter(([categoryName, products]) => categoryName !== "Uncategorized" && products.length > 0)
+              .map(([categoryName, products]) => (
+                <li
+                  key={categoryName}
+                  className={`category-item ${selectedCategory === categoryName ? "active" : ""}`}
+                  onClick={() => setSelectedCategory(categoryName)}
+                >
+                  <span>{categoryName}</span>
+                  <span className="category-count">{products.length}</span>
+                </li>
+              ))}
+          </ul>
         </div>
-      </div>
-      
-      <div className="container">
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
+        
+        {/* Main Content */}
+        <div className="main-content">
+          {/* Single Category View */}
+          {selectedCategory !== "all" && productsByCategory[selectedCategory] && (
+            <div className="category-section">
+              <div className="category-header">
+                <h2 className="category-title">{selectedCategory}</h2>
+                <span className="product-count">{productsByCategory[selectedCategory].length} products available</span>
+              </div>
+              <div className="products-grid">
+                {productsByCategory[selectedCategory].map((product, i) => (
+                  <div key={i}>
+                    <Card product={product} />
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="mt-2">Loading products...</p>
-          </div>
-        )}
-        
-        {/* Category Filter */}
-        {!loading && Object.keys(productsByCategory).length > 0 && (
-          <CategoryFilter />
-        )}
-        
-        {/* Single Category View */}
-        {!loading && selectedCategory !== "all" && productsByCategory[selectedCategory] && (
-          <div className="single-category-view">
-            <CategorySection 
-              categoryName={selectedCategory} 
-              products={productsByCategory[selectedCategory]} 
-              index={0}
+          )}
+          
+          {/* All Categories View */}
+          {selectedCategory === "all" && (
+            <div>
+              {/* <div className="section-header">
+                <h2 className="section-title">Shop by Category</h2>
+                <p>Browse our products organized by categories</p>
+              </div> */}
+              
+              {Object.entries(productsByCategory)
+                .filter(([categoryName, products]) => categoryName !== "Uncategorized" && products.length > 0)
+                .map(([categoryName, products]) => (
+                  <div key={categoryName} className="category-section">
+                    <div className="category-header">
+                      <h3 className="category-title">{categoryName}</h3>
+                      <span className="product-count">{products.length} products available</span>
+                    </div>
+                    <div className="products-grid">
+                      {products.map((product, i) => (
+                        <div key={i}>
+                          <Card product={product} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+          
+          {/* Search Section */}
+          <div className="search-section">
+            <h3>Looking for something specific?</h3>
+            <p>Search across all our products</p>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-        )}
-        
-        {/* All Categories View */}
-        {!loading && selectedCategory === "all" && Object.keys(productsByCategory).length > 0 && (
-          <div className="products-by-category">
-            <div className="text-center mb-5">
-              <h2 className="section-title">
-                <i className="bi bi-grid-3x3-gap-fill me-2" style={{ color: '#2E7D32' }}></i>
-                Shop by Category
-              </h2>
-              <p className="section-subtitle">
-                Browse our products organized by categories
-              </p>
-            </div>
-            
-            {/* Show all categories including Uncategorized */}
-            {Object.entries(productsByCategory).map(([categoryName, products], index) => (
-              <CategorySection 
-                key={categoryName} 
-                categoryName={categoryName} 
-                products={products} 
-                index={index}
-              />
-            ))}
-          </div>
-        )}
-        
-        {/* Fallback: Show all products if no categories */}
-        {!loading && Object.keys(productsByCategory).length === 0 && productsByArrival.length > 0 && (
-          <div className="all-products-section">
-            <div className="text-center mb-5">
-              <h2 className="section-title">
-                <i className="bi bi-star-fill text-warning me-2"></i>
-                All Products
-              </h2>
-              <p className="section-subtitle">
-                Browse our complete product collection
-              </p>
-            </div>
-            
-            <div className="row">
-              {productsByArrival.map((product, i) => (
-                <div key={i} className="col-xs-10 col-sm-6 col-md-4 col-lg-3 mb-4">
-                  <Card product={product} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Search Results */}
-        {searchTerm && (
-          <div className="search-results-section">
-            <div className="text-center mb-4">
-              <h3 className="search-title">
-                <i className="bi bi-search me-2"></i>
-                Search Results for "{searchTerm}"
-              </h3>
-              <p className="text-muted">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-              </p>
-            </div>
-            
-            <div className="row">
-              {filteredProducts.map((product, i) => (
-                <div key={i} className="col-xs-10 col-sm-6 col-md-4 col-lg-3 mb-4">
-                  <Card product={product} />
-                </div>
-              ))}
-            </div>
-            
-            {filteredProducts.length === 0 && !error && (
-              <div className="text-center py-5">
-                <i className="bi bi-search" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
-                <h4 className="text-muted mt-3">No products found</h4>
-                <p className="text-muted">Try adjusting your search terms</p>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Search Bar */}
-        {!searchTerm && !loading && (
-          <div className="search-bar-section">
-            <div className="text-center mb-4">
-              <h3 className="search-title">Looking for something specific?</h3>
-              <p className="text-muted">Search across all our products</p>
-            </div>
-            <div className="search-bar">
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control search-input"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button className="btn btn-primary" type="button">
-                  <i className="bi bi-search"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Error State */}
-        {error && (
-          <div className="alert alert-danger">
-            <i className="bi bi-exclamation-triangle me-2"></i>
-            {error}
-          </div>
-        )}
-        
-        {/* Empty State */}
-        {!loading && Object.keys(productsByCategory).length === 0 && !error && (
-          <div className="text-center py-5">
-            <i className="bi bi-box-seam" style={{ fontSize: '4rem', color: '#6c757d' }}></i>
-            <h3 className="text-muted mt-3">No products available</h3>
-            <p className="text-muted">Check back later for new products</p>
-          </div>
-        )}
+        </div>
       </div>
     </Layout>
   );
