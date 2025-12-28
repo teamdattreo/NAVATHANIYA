@@ -19,7 +19,7 @@ const Menu = ({ history }) => {
             <div className="brand-icon-wrapper me-2">
               <i className="bi bi-shop"></i>
             </div>
-            <span className="brand-text">NAVATHANIYA</span>
+            <span className="brand-text">GENERAL STORE</span>
           </Link>
           
           {/* Mobile toggle */}
@@ -93,12 +93,62 @@ const Menu = ({ history }) => {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/about">
-                  <i className="bi bi-building me-1"></i>
-                  <span>About</span>
+                <Link className="nav-link" to="/products">
+                  <i className="bi bi-box me-1"></i>
+                  <span>Products</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/garments">
+                  <i className="bi bi-bag me-1"></i>
+                  <span>Garments</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/kitchen">
+                  <i className="bi bi-cup-hot me-1"></i>
+                  <span>Kitchen</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/traditional">
+                  <i className="bi bi-star me-1"></i>
+                  <span>Traditional</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/blog">
+                  <i className="bi bi-journal-text me-1"></i>
+                  <span>Blog</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/resources">
+                  <i className="bi bi-book me-1"></i>
+                  <span>Resources</span>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/contact">
+                  <i className="bi bi-envelope me-1"></i>
+                  <span>Contact</span>
                 </Link>
               </li>
             </ul>
+            
+            {/* Right Navigation */}
+            <div className="d-flex align-items-center">
+              <button className="btn btn-link nav-icon-btn me-3">
+                <i className="bi bi-search"></i>
+              </button>
+              <button className="btn btn-link nav-icon-btn me-3 position-relative">
+                <i className="bi bi-cart3"></i>
+                <span className="cart-badge">0</span>
+              </button>
+              <button className="btn btn-sign-up">
+                Sign Up
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -231,9 +281,54 @@ const Menu = ({ history }) => {
           text-align: center;
         }
         
-        .dropdown-divider {
-          border-color: #e0e0e0;
-          margin: 0.5rem 0;
+        .nav-icon-btn {
+          color: #2c3e50 !important;
+          background: none;
+          border: none;
+          padding: 0.5rem;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+          position: relative;
+        }
+        
+        .nav-icon-btn:hover {
+          background: rgba(46, 125, 50, 0.1);
+          color: #2E7D32 !important;
+          transform: scale(1.1);
+        }
+        
+        .cart-badge {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: #ff6b35;
+          color: white;
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+          font-size: 0.7rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+        }
+        
+        .btn-sign-up {
+          background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+          border: none;
+          color: white;
+          font-weight: 600;
+          padding: 0.5rem 1.5rem;
+          border-radius: 25px;
+          box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+          transition: all 0.3s ease;
+        }
+        
+        .btn-sign-up:hover {
+          background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+          color: white;
         }
         
         @media (max-width: 768px) {

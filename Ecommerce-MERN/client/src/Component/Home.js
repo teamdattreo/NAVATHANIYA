@@ -364,25 +364,119 @@ const Home = () => {
         }
         
         .hero-section {
-          background: linear-gradient(135deg, rgba(46, 125, 50, 0.7) 0%, rgba(56, 142, 60, 0.7) 50%, rgba(67, 160, 71, 0.7) 100%),
-                      url('/img/img.png') center/cover;
+          background: linear-gradient(135deg, rgba(46, 125, 50, 0.9) 0%, rgba(56, 142, 60, 0.9) 50%, rgba(67, 160, 71, 0.9) 100%),
+                      url('/img/hero-bg.jpg') center/cover;
           color: white;
-          padding: 5rem 0;
+          padding: 6rem 0;
           position: relative;
-          background-attachment: fixed;
+          overflow: hidden;
         }
         
-        .hero-title {
-          font-size: 3.5rem;
-          font-weight: 700;
-          margin-bottom: 1rem;
+        .hero-content {
+          position: relative;
+          z-index: 2;
+        }
+        
+        .brand-title {
+          font-size: 4rem;
+          font-weight: 800;
+          margin-bottom: 0.5rem;
+          text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+          letter-spacing: 2px;
+          color: #ffffff;
+        }
+        
+        .brand-subtitle {
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin-bottom: 2rem;
+          opacity: 0.95;
           text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
-        .hero-subtitle {
-          font-size: 1.25rem;
+        .hero-description {
+          font-size: 1.2rem;
           opacity: 0.90;
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+          line-height: 1.6;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .btn-shop-now {
+          background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+          border: none;
+          color: white;
+          font-weight: 700;
+          padding: 1rem 2.5rem;
+          border-radius: 50px;
+          box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        
+        .btn-shop-now:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+          background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+          color: white;
+        }
+        
+        .hero-image-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 1rem;
+          height: 400px;
+        }
+        
+        .hero-image-item {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          transition: all 0.3s ease;
+        }
+        
+        .hero-image-item:hover {
+          transform: translateY(-5px);
+          background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .hero-image-item.left {
+          background: linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(247, 147, 30, 0.3) 100%);
+        }
+        
+        .hero-image-item.middle {
+          background: linear-gradient(135deg, rgba(69, 183, 209, 0.3) 0%, rgba(78, 205, 196, 0.3) 100%);
+        }
+        
+        .hero-image-item.right {
+          background: linear-gradient(135deg, rgba(247, 183, 49, 0.3) 0%, rgba(255, 193, 7, 0.3) 100%);
+        }
+        
+        .image-overlay {
+          text-align: center;
+          z-index: 2;
+        }
+        
+        .image-overlay i {
+          font-size: 3rem;
+          display: block;
+          margin-bottom: 1rem;
+          color: white;
+        }
+        
+        .image-overlay span {
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: white;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
         
         .category-card {
@@ -567,25 +661,43 @@ const Home = () => {
         <div className="container">
           <div className="row align-items-center">
             <div className="col-lg-6">
-              <h1 className="hero-title">
-                NAVATHANIYA
-              </h1>
-              <p className="hero-subtitle">
-                Quality Garments, Electrical Goods, Kitchen Items & Traditional Products
-              </p>
-              <div className="hero-buttons">
-                {/* <button className="btn btn-light btn-lg me-3">
-                  <i className="bi bi-shopping-bag me-2"></i>
-                  Start Shopping
-                </button>
-                <button className="btn btn-outline-light btn-lg">
-                  <i className="bi bi-info-circle me-2"></i>
-                  Learn More
-                </button> */}
+              <div className="hero-content">
+                <div className="brand-logo mb-4">
+                  <h1 className="brand-title">GENERAL STORE</h1>
+                  <p className="brand-subtitle">Your One-Stop Shop for Home & Tradition</p>
+                </div>
+                <p className="hero-description">
+                  From Garments & Gadgets to Pooja Essentials. Explore Our Diverse Collection.
+                </p>
+                <div className="hero-buttons">
+                  <button className="btn btn-shop-now btn-lg">
+                    <i className="bi bi-cart3 me-2"></i>
+                    SHOP NOW
+                  </button>
+                </div>
               </div>
             </div>
             <div className="col-lg-6">
-              {/* Empty column for layout balance */}
+              <div className="hero-image-grid">
+                <div className="hero-image-item left">
+                  <div className="image-overlay">
+                    <i className="bi bi-bag-heart"></i>
+                    <span>Garments</span>
+                  </div>
+                </div>
+                <div className="hero-image-item middle">
+                  <div className="image-overlay">
+                    <i className="bi bi-cup-hot"></i>
+                    <span>Kitchen</span>
+                  </div>
+                </div>
+                <div className="hero-image-item right">
+                  <div className="image-overlay">
+                    <i className="bi bi-star"></i>
+                    <span>Traditional</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
