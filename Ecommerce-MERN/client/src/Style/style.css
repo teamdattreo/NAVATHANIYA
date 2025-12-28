@@ -132,3 +132,79 @@
 
 /* small image sizing */
 .smallS img{max-width:100%;height:auto}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 768px) {
+  .product-card {
+    margin-bottom: 1rem;
+  }
+  
+  .product-img {
+    min-height: 120px;
+  }
+  
+  .card-header.name {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .price {
+    font-size: 1.25rem;
+  }
+  
+  .btn-orange {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .tag-badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-card {
+    margin-bottom: 0.75rem;
+  }
+  
+  .product-img {
+    min-height: 100px;
+  }
+  
+  .card-header.name {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .price {
+    font-size: 1.1rem;
+  }
+  
+  .btn-orange {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  
+  .tag-badge {
+    font-size: 0.65rem;
+    padding: 3px 6px;
+    margin-right: 0.25rem !important;
+  }
+  
+  .tag-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    gap: 0.25rem;
+  }
+}

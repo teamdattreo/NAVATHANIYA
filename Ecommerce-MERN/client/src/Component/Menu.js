@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, withRouter } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Menu = ({ history }) => {
   const { user, logout, isAdmin } = useAuth();
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     history.push('/');
+  };
+
+  const handleNavClick = () => {
+    setIsNavOpen(false);
   };
 
   return (
@@ -23,27 +28,34 @@ const Menu = ({ history }) => {
           </Link>
           
           {/* Mobile toggle */}
-          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+          <button 
+            className="navbar-toggler" 
+            type="button" 
+            onClick={() => setIsNavOpen(!isNavOpen)}
+            aria-controls="navbarNav"
+            aria-expanded={isNavOpen}
+            aria-label="Toggle navigation"
+          >
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          <div className="collapse navbar-collapse" id="navbarNav">
+          <div className={`collapse navbar-collapse ${isNavOpen ? 'show' : ''}`} id="navbarNav">
             {/* Center Navigation */}
             <ul className="navbar-nav mx-auto">
               <li className="nav-item">
-                <Link className="nav-link" to="/">
+                <Link className="nav-link" to="/" onClick={handleNavClick}>
                   <i className="bi bi-house-door me-1"></i>
                   <span>Home</span>
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/products">
+                <Link className="nav-link" to="/products" onClick={handleNavClick}>
                   <i className="bi bi-box me-1"></i>
                   <span>Products</span>
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/contact">
+                <Link className="nav-link" to="/contact" onClick={handleNavClick}>
                   <i className="bi bi-envelope me-1"></i>
                   <span>Contact</span>
                 </Link>
@@ -298,11 +310,81 @@ const Menu = ({ history }) => {
           
           .nav-link {
             padding: 0.7rem 1rem !important;
+            text-align: center;
+            justify-content: center;
+          }
+          
+          .navbar-nav {
+            text-align: center;
+            padding: 1rem 0;
+            width: 100%;
+          }
+          
+          .navbar-nav .nav-item {
+            margin-bottom: 0.5rem;
+            width: 100%;
+          }
+          
+          .d-flex.align-items-center {
+            justify-content: center;
+            margin-top: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+          }
+          
+          .dropdown-menu {
+            position: static !important;
+            transform: none !important;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            width: 100%;
+          }
+          
+          .navbar-collapse.show {
+            display: block !important;
+          }
+          
+          .navbar-collapse:not(.show) {
+            display: none !important;
+          }
+        }
+        
+        @media (max-width: 576px) {
+          .brand-text {
+            font-size: 1rem;
+          }
+          
+          .brand-icon-wrapper {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+          }
+          
+          .nav-link span {
+            font-size: 0.9rem;
           }
           
           .login-btn, .admin-dropdown-btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.8rem;
+            width: 100%;
+            max-width: 200px;
+          }
+          
+          .logout-btn {
+            width: 32px;
+            height: 32px;
+          }
+          
+          .navbar-toggler {
+            padding: 0.25rem 0.5rem;
+          }
+          
+          .navbar-toggler-icon {
+            width: 1.2em;
+            height: 1.2em;
           }
         }
       `}</style>

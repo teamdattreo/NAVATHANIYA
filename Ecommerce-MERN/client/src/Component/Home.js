@@ -479,6 +479,83 @@ const Home = () => {
           outline: none;
           border-color: #2E7D32;
         }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .shop-container {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+          }
+          
+          .sidebar {
+            width: 100%;
+            order: 2;
+          }
+          
+          .main-content {
+            order: 1;
+          }
+          
+          .section-title {
+            font-size: 1.5rem;
+          }
+          
+          .category-title {
+            font-size: 1.25rem;
+          }
+          
+          .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+          }
+          
+          .search-section {
+            padding: 1.5rem;
+          }
+          
+          .search-input {
+            max-width: 100%;
+          }
+        }
+        
+        @media (max-width: 576px) {
+          .shop-container {
+            padding: 0.5rem;
+          }
+          
+          .sidebar {
+            padding: 1rem;
+          }
+          
+          .section-title {
+            font-size: 1.25rem;
+          }
+          
+          .category-title {
+            font-size: 1.1rem;
+          }
+          
+          .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+          }
+          
+          .search-section {
+            padding: 1rem;
+          }
+          
+          .category-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+          
+          .product-count {
+            margin-left: 0;
+            align-self: flex-start;
+          }
+        }
       `}</style>
       
       <div className="shop-container">
