@@ -13,12 +13,13 @@ const PORT = process.env.PORT || 8000;
 
 const MONGODB_URI =
   process.env.MONGODB_URI ||
-  "mongodb+srv://vikeshramesh1:vikesh@cluster0.mqjh8.mongodb.net/Ecommerce?retryWrites=true&w=majority";
+  "mongodb+srv://vikeshramesh1:vikesh@cluster0.mqjh8.mongodb.net/Ecommerce?retryWrites=true&w=majority&ssl=true&authSource=admin";
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useCreateIndex: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
 });
 
 mongoose.connection.on("connected", () => {
