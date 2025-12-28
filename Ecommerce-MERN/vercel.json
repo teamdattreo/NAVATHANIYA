@@ -1,1 +1,1 @@
-{"version": 2, "builds": [{"src": "client/package.json", "use": "@vercel/static-build", "config": {"distDir": "build"}}], "installCommand": "cd client && npm install", "buildCommand": "cd client && npm run build", "outputDirectory": "client/build", "nodeVersion": "16"}
+{"version": 2, "builds": [{"src": "client/package.json", "use": "@vercel/static-build", "config": {"distDir": "build"}}], "installCommand": "cd client && npm install", "buildCommand": "unset NODE_OPTIONS && cd client && npm run build", "outputDirectory": "client/build", "nodeVersion": "16"}
