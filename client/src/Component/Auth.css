@@ -1,0 +1,297 @@
+.admin-login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.background-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.admin-login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  padding: 3rem;
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logo-circle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.logo-circle i {
+  font-size: 2.5rem;
+  color: white;
+}
+
+.login-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.login-form {
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.form-label i {
+  color: #667eea;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  background: white;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #adb5bd;
+}
+
+.btn-login {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  width: 100%;
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-login:hover::before {
+  left: 100%;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+  color: white;
+}
+
+.btn-login:disabled {
+  opacity: 0.7;
+  transform: none;
+}
+
+.btn-login:disabled::before {
+  display: none;
+}
+
+.alert-error {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  border: none;
+  border-radius: 0.75rem;
+  color: white;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.login-footer {
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1.5rem;
+}
+
+.btn-back {
+  background: transparent;
+  border: 2px solid #e9ecef;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  color: #6c757d;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.btn-back:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .admin-login-container {
+    padding: 1rem;
+  }
+  
+  .admin-login-card {
+    padding: 2rem;
+    margin: 1rem;
+  }
+  
+  .logo-circle {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-circle i {
+    font-size: 2rem;
+  }
+  
+  .login-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Admin Signup specific styles */
+.admin-signup-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-signup-container .background-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+}
+
+.admin-signup-container .logo-circle {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+}
+
+.admin-signup-container .btn-login {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+
+.admin-signup-container .btn-login:hover {
+  box-shadow: 0 15px 35px rgba(78, 205, 196, 0.3);
+}
+
+.admin-signup-container .form-label i {
+  color: #4ecdc4;
+}
+
+.admin-signup-container .form-control:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 0.2rem rgba(78, 205, 196, 0.25);
+}
+
+.admin-signup-container .btn-back:hover {
+  border-color: #4ecdc4;
+  color: #4ecdc4;
+  background: rgba(78, 205, 196, 0.05);
+}
