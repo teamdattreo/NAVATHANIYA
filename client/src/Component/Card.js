@@ -8,7 +8,7 @@ const Card = ({ product, showViewProductButton = true }) => {
 
   const showViewButton = (showViewProductButton) =>
     showViewProductButton && (
-      <Link to={`/product/${product._id}`} className="btn btn-outline-dark btn-sm mt-2">
+      <Link to={`/product/${product._id}`} className="btn btn-sm product-view-btn">
         View Product
       </Link>
     );
@@ -31,12 +31,14 @@ const Card = ({ product, showViewProductButton = true }) => {
         <p className="product-grid-meta text-muted">
           Added {moment(product.createdAt).fromNow()}
         </p>
-        <div className="product-grid-price">
-          <span>Rs.{product.price}</span>
+        <div className="product-grid-meta-row">
+          <div className="product-grid-price">
+            <span>Rs.{product.price}</span>
+          </div>
+          {showStock(product.quantity)}
         </div>
         <div className="product-grid-actions">
           {showViewButton(showViewProductButton)}
-          {showStock(product.quantity)}
         </div>
       </div>
     </div>

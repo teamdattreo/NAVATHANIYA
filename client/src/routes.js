@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Dashboard from "./Component/Dashboard";
 import Home from "./Component/Home";
 import About from "./Component/About";
+import Contact from "./Component/Contact";
 import AddCategory from "./Component/AddCategory";
 import AddProduct from "./Component/AddProduct";
 import Product from "./Component/Product";
@@ -21,6 +22,7 @@ const Routes = () => {
         <Switch>
           <Route path="/" exact component={Home} />
           <Route path="/about" exact component={About} />
+          <Route path="/contact" exact component={Contact} />
           <Route path="/admin/login" exact component={AdminLogin} />
           <Route path="/admin/signup" exact component={AdminSignup} />
           <Route path="/product/:productId" exact component={Product} />

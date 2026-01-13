@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import { Link, useHistory } from "react-router-dom";
 import { createProduct, getCategories } from "./api";
-import adminImage from "../img/admin.png";
 
 const AddProduct = () => {
   const [values, setValues] = useState({
@@ -241,48 +240,24 @@ const AddProduct = () => {
   );
 
   return (
-    <AdminLayout
-      title="Add a new product"
-      description={`Add new products to NAVATHANIYA inventory`}
-    >
-      <style>{`
-        .admin-form-shell {
-          background: #fffdf8;
-          border: 1px solid rgba(120, 91, 58, 0.18);
-          border-radius: 16px;
-          padding: 2rem;
-          box-shadow: 0 12px 24px rgba(43, 33, 23, 0.12);
-        }
-
-        .admin-form-page {
-          min-height: 100vh;
-          background: linear-gradient(90deg, rgba(43, 33, 23, 0.72), rgba(43, 33, 23, 0.35)),
-            url(${adminImage}) center/cover no-repeat;
-          padding: 2rem 0;
-          display: flex;
-          align-items: center;
-        }
-
-        @media (max-width: 768px) {
-          .admin-form-page {
-            padding: 1.25rem 0;
-          }
-        }
-      `}</style>
-      <div className="admin-form-page">
-        <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-12 col-lg-7">
-              <div className="admin-form-shell">
-                {showLoading()}
-                {showSuccess()}
-                {showError()}
-                {newPostForm()}
-                {goBack()}
-              </div>
-            </div>
-          </div>
+    <AdminLayout title="Add a new product" description={`Add new products to NAVATHANIYA inventory`}>
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Add Product</h1>
+          <p className="admin-page-subtitle">Create a new product listing for your store.</p>
         </div>
+        <Link to="/dashboard" className="btn btn-outline-primary">
+          <i className="bi bi-arrow-left me-2"></i>
+          Back to Dashboard
+        </Link>
+      </div>
+
+      <div className="admin-panel">
+        {showLoading()}
+        {showSuccess()}
+        {showError()}
+        {newPostForm()}
+        {goBack()}
       </div>
     </AdminLayout>
   );

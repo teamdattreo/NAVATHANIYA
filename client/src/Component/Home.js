@@ -4,6 +4,9 @@ import { getProducts, getCategories } from "./api";
 import Card from "./Card";
 import Search from "./Search";
 import heroImage from "../img/hero.png";
+import curationImage from "../img/img1.png";
+import curationImage2 from "../img/img2.png";
+import curationImage3 from "../img/img3.png";
 
 const Home = () => {
   const [allProducts, setAllProducts] = useState([]);
@@ -16,7 +19,13 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentApiPage, setCurrentApiPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PRODUCTS_PER_PAGE = 10;
+  const HOME_PRODUCTS_PER_PAGE = 10;
+  const MOBILE_PRODUCTS_PER_PAGE = 6;
+  const API_PAGE_SIZE = 20;
 
   const loadCategories = () => {
     return getCategories().then((data) => {
@@ -37,70 +46,94 @@ const Home = () => {
     });
   };
 
-  const loadProductsByArrival = (limit = 10000) => {
-    // fetch all products by requesting a large limit
-    getProducts(1, limit).then((data) => {
-      if (!data) {
-        setError("Server returned no data");
-        return;
+  const getProductKey = (product) =>
+    product._id || product.id || product.slug || `${product.name}-${product.price}`;
+
+  const normalizeProducts = (data) => {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.products)) return data.products;
+    return [];
+  };
+
+  const mergeProducts = (existing, incoming) => {
+    const map = new Map();
+    existing.forEach((item) => map.set(getProductKey(item), item));
+    incoming.forEach((item) => map.set(getProductKey(item), item));
+    return Array.from(map.values());
+  };
+
+  const updateGroupedProducts = (products) => {
+    const grouped = {};
+    products.forEach((product) => {
+      const categoryName = product.category?.name || "Uncategorized";
+      if (!grouped[categoryName]) {
+        grouped[categoryName] = [];
       }
-      if (Array.isArray(data)) {
-        // Server returns array directly
-        const products = data;
-        setAllProducts(products);
-        setProductsByArrival(products);
-        setFilteredProducts(products);
-        
-        // Group products by category - handle different data structures
-        const grouped = {};
-        products.forEach((product) => {
-          const categoryName = product.category?.name || "Uncategorized";
-          if (!grouped[categoryName]) {
-            grouped[categoryName] = [];
-          }
-          grouped[categoryName].push(product);
-        });
-        
-        setProductsByCategory(grouped);
-        setLoading(false);
-      } else if (data.error) {
-        setError(data.error);
-      } else {
-        // Handle case where data might be an object with products property
-        const products = data.products || [];
-        setAllProducts(products);
-        setProductsByArrival(products);
-        setFilteredProducts(products);
-        
-        // Group products by category
-        const grouped = {};
-        products.forEach((product) => {
-          const categoryName = product.category?.name || "Uncategorized";
-          if (!grouped[categoryName]) {
-            grouped[categoryName] = [];
-          }
-          grouped[categoryName].push(product);
-        });
-        
-        setProductsByCategory(grouped);
-        setLoading(false);
-      }
-    }).catch((error) => {
-      setError(error.message || "Failed to load products");
-      setLoading(false);
+      grouped[categoryName].push(product);
     });
+    setProductsByCategory(grouped);
+  };
+
+  const loadProductsByArrival = (page = 1, append = false) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setLoading(true);
+      setHasMore(true);
+      setCurrentApiPage(1);
+    }
+
+    getProducts(page, API_PAGE_SIZE)
+      .then((data) => {
+        if (!data) {
+          setError("Server returned no data");
+          return;
+        }
+        if (data.error) {
+          setError(data.error);
+          return;
+        }
+
+        const products = normalizeProducts(data);
+        const combined = append ? mergeProducts(allProducts, products) : products;
+        setAllProducts(combined);
+        setProductsByArrival(combined);
+        setFilteredProducts(combined);
+        updateGroupedProducts(combined);
+
+        const total = data.total || data.count || data.totalProducts || data.size;
+        const nextHasMore =
+          typeof total === "number"
+            ? page * API_PAGE_SIZE < total
+            : products.length === API_PAGE_SIZE;
+        setHasMore(nextHasMore);
+        setCurrentApiPage(page);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.message || "Failed to load products");
+        setLoading(false);
+      })
+      .finally(() => {
+        setIsLoadingMore(false);
+      });
+  };
+
+  const handleLoadMore = () => {
+    if (!hasMore || isLoadingMore) return;
+    loadProductsByArrival(currentApiPage + 1, true);
   };
 
   useEffect(() => {
     // Load categories first, then products
     loadCategories().then(() => {
-      loadProductsByArrival();
+      loadProductsByArrival(1, false);
     });
 
     const onProductAdded = () => {
       // Reload categories and products when a new product is added
       loadCategories().then(() => {
-        loadProductsByArrival();
+        loadProductsByArrival(1, false);
       });
     };
     const onSearchResults = (e) => {
@@ -108,11 +141,13 @@ const Home = () => {
       if (!results || results.length === 0) {
         // restore full list when no results by reloading
         loadCategories().then(() => {
-          loadProductsByArrival();
+          loadProductsByArrival(1, false);
         });
       } else {
         setProductsByArrival(results);
         setFilteredProducts(results);
+        setHasMore(false);
+        setCurrentApiPage(1);
       }
     };
 
@@ -346,11 +381,42 @@ const Home = () => {
     </div>
   );
 
+  const displayProducts =
+    selectedCategory === "all"
+      ? filteredProducts
+      : productsByCategory[selectedCategory] || [];
+
+  const [homePage, setHomePage] = useState(1);
+  const homeTotalPages = Math.max(
+    1,
+    Math.ceil(displayProducts.length / HOME_PRODUCTS_PER_PAGE)
+  );
+  const homeStartIndex = (homePage - 1) * HOME_PRODUCTS_PER_PAGE;
+  const homeEndIndex = homeStartIndex + HOME_PRODUCTS_PER_PAGE;
+  const homeProducts = displayProducts.slice(homeStartIndex, homeEndIndex);
+
+  useEffect(() => {
+    setHomePage(1);
+  }, [selectedCategory, displayProducts.length]);
+
+  const [mobilePage, setMobilePage] = useState(1);
+  const mobileTotalPages = Math.max(
+    1,
+    Math.ceil(displayProducts.length / MOBILE_PRODUCTS_PER_PAGE)
+  );
+  const mobileStartIndex = (mobilePage - 1) * MOBILE_PRODUCTS_PER_PAGE;
+  const mobileEndIndex = mobileStartIndex + MOBILE_PRODUCTS_PER_PAGE;
+  const mobileProducts = displayProducts.slice(mobileStartIndex, mobileEndIndex);
+
+  useEffect(() => {
+    setMobilePage(1);
+  }, [selectedCategory, displayProducts.length]);
+
   return (
     <Layout
       title="Navathaniya - Everyday Essentials"
       description="Navathaniya marketplace for garments, kitchen, electrical, and traditional items"
-      className="container-fluid"
+      className="container-fluid p-0"
     >
       <style>{`
         :root {
@@ -837,7 +903,7 @@ const Home = () => {
         .product-grid-top {
           position: relative;
           padding: 1rem;
-          background: #fff7ec;
+          background: #f1e4cf;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -880,6 +946,13 @@ const Home = () => {
           flex: 1;
         }
 
+        .product-grid-meta-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+        }
+
         .product-grid-title {
           font-size: 0.95rem;
           font-weight: 600;
@@ -904,6 +977,196 @@ const Home = () => {
           align-items: center;
           justify-content: space-between;
           gap: 0.5rem;
+        }
+
+        .product-view-btn {
+          width: 100%;
+          background: #b58b46;
+          color: #fff7e6;
+          border: none;
+          border-radius: 10px;
+          padding: 0.55rem 0.75rem;
+          font-weight: 600;
+        }
+
+        .product-view-btn:hover {
+          background: #9b7638;
+          color: #fff7e6;
+        }
+
+        .nava-products {
+          padding: 3rem 2rem 4rem;
+          background: #f7f1e3;
+        }
+
+        .nava-products-inner {
+          background: #fffdf8;
+          border-radius: 28px;
+          padding: 2.5rem 2.5rem 3rem;
+          box-shadow: 0 18px 40px rgba(38, 27, 18, 0.12);
+        }
+
+        .nava-products-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 2rem;
+          align-items: flex-end;
+          margin-bottom: 2rem;
+        }
+
+        .nava-products-eyebrow {
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          font-size: 0.7rem;
+          color: rgba(75, 56, 38, 0.6);
+          display: inline-block;
+          margin-bottom: 0.6rem;
+        }
+
+        .nava-products-header h2 {
+          font-size: 2rem;
+          margin: 0;
+          color: #4b3826;
+        }
+
+        .nava-products-header p {
+          margin: 0;
+          max-width: 320px;
+          color: #6b5845;
+        }
+
+        .nava-products-filters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          align-items: center;
+          margin-bottom: 2rem;
+        }
+
+        .nava-pill {
+          border: 1px solid rgba(120, 91, 58, 0.35);
+          background: #fffdf8;
+          color: #4b3826;
+          padding: 0.45rem 1rem;
+          border-radius: 999px;
+          font-weight: 600;
+          font-size: 0.85rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+        }
+
+        .nava-pill span {
+          background: rgba(109, 39, 53, 0.08);
+          border-radius: 999px;
+          padding: 0.15rem 0.55rem;
+          font-size: 0.75rem;
+        }
+
+        .nava-pill.active {
+          background: #6d2735;
+          color: #fff7e6;
+          border-color: #6d2735;
+        }
+
+        .nava-pill.active span {
+          background: rgba(255, 255, 255, 0.2);
+          color: #fff7e6;
+        }
+
+        .nava-products-grid {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 1.2rem;
+        }
+
+        .nava-products-grid .product-grid-card {
+          box-shadow: 0 14px 26px rgba(38, 27, 18, 0.12);
+        }
+
+        .nava-products-footer {
+          display: flex;
+          justify-content: center;
+          margin-top: 2rem;
+        }
+
+        .nava-pagination {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          justify-content: center;
+          margin-top: 1.5rem;
+        }
+
+        .nava-mobile-pagination {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          justify-content: center;
+          margin: 0 1.25rem 1.5rem;
+        }
+
+        .nava-page-btn {
+          border: 1px solid rgba(120, 91, 58, 0.35);
+          background: #fffdf8;
+          color: #4b3826;
+          padding: 0.35rem 0.7rem;
+          border-radius: 10px;
+          font-size: 0.85rem;
+          min-width: 34px;
+        }
+
+        .nava-page-btn.active {
+          background: #6d2735;
+          border-color: #6d2735;
+          color: #fff7e6;
+        }
+
+        .skeleton-card {
+          background: #f2e8d6;
+          border-radius: 16px;
+          padding: 1rem;
+          min-height: 220px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .skeleton-card::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -60%;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+          animation: skeleton-shimmer 1.2s infinite;
+        }
+
+        .skeleton-line {
+          height: 12px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.6);
+          margin-top: 0.6rem;
+        }
+
+        .skeleton-line.short {
+          width: 60%;
+        }
+
+        .skeleton-thumb {
+          width: 100%;
+          height: 140px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes skeleton-shimmer {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(160%);
+          }
         }
         
         /* Mobile Responsive Styles */
@@ -1050,129 +1313,596 @@ const Home = () => {
             align-self: flex-start;
           }
         }
+
+        .nava-home-hero {
+          position: relative;
+          min-height: 70vh;
+          display: flex;
+          align-items: center;
+          background: url(${heroImage}) center/cover no-repeat;
+        }
+
+        .nava-hero-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(51, 35, 20, 0.45);
+        }
+
+
+        .nava-home-hero-content {
+          position: relative;
+          z-index: 1;
+          max-width: 640px;
+          padding: 4rem 2rem;
+          color: #fff7e6;
+        }
+
+        .nava-hero-actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+          flex-wrap: wrap;
+        }
+
+        .nava-hero-primary {
+          background: #b58b46;
+          color: #fff7e6;
+          padding: 0.75rem 1.6rem;
+          border-radius: 999px;
+          text-decoration: none;
+          font-weight: 700;
+        }
+
+        .nava-hero-secondary {
+          border: 1px solid rgba(255, 247, 230, 0.8);
+          color: #fff7e6;
+          padding: 0.7rem 1.5rem;
+          border-radius: 999px;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .nava-category-strip {
+          margin-top: -2.5rem;
+          padding: 0 1.5rem 2rem;
+        }
+
+        .nava-category-track {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 1rem;
+        }
+
+        .nava-category-card {
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 18px;
+          padding: 1.2rem;
+          text-align: center;
+          box-shadow: 0 16px 30px rgba(31, 18, 10, 0.15);
+          font-weight: 600;
+          color: #4a1a23;
+        }
+
+        .nava-category-card i {
+          font-size: 1.6rem;
+          margin-bottom: 0.35rem;
+          display: block;
+          color: #b58b46;
+        }
+
+        .nava-curations {
+          padding: 3rem 1.5rem;
+        }
+
+        .nava-curations-header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .nava-curations-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          grid-template-rows: repeat(2, minmax(180px, 1fr));
+          gap: 1rem;
+        }
+
+        .nava-curation-card {
+          position: relative;
+          border-radius: 22px;
+          overflow: hidden;
+          background: #2b2117;
+          color: #fff7e6;
+          display: flex;
+          align-items: flex-end;
+          padding: 1.5rem;
+        }
+
+        .nava-curation-image {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.9;
+        }
+
+        .nava-curation-content {
+          position: relative;
+          z-index: 1;
+        }
+
+        .curation-large {
+          grid-row: 1 / span 2;
+        }
+
+        .nava-mobile-home {
+          display: none;
+        }
+
+        .nava-mobile-bottom {
+          display: none;
+        }
+
+        @media (max-width: 900px) {
+          .nava-curations-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(3, minmax(180px, 1fr));
+          }
+
+          .curation-large {
+            grid-row: auto;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .nava-home-hero,
+          .nava-category-strip,
+          .nava-curations,
+          .nava-products {
+            display: none;
+          }
+
+          .nava-mobile-home {
+            display: block;
+            padding: 0 0 5rem;
+            background: #f7f1e3;
+          }
+
+          .nava-mobile-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            color: #4b3826;
+          }
+
+          .nava-mobile-topbar h2 {
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: 600;
+          }
+
+          .nava-mobile-actions button {
+            border: none;
+            background: transparent;
+            font-size: 1.2rem;
+            color: #4b3826;
+          }
+
+          .nava-mobile-hero {
+            margin-top: 0;
+            border-radius: 0;
+            overflow: hidden;
+            background: url(${heroImage}) center/cover no-repeat;
+            min-height: 60vh;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+          }
+
+          .nava-mobile-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(51, 35, 20, 0.65), rgba(51, 35, 20, 0.05));
+          }
+
+          .nava-mobile-hero-content {
+            position: relative;
+            z-index: 1;
+            color: #fff7e6;
+            padding: 1.25rem;
+          }
+
+          .nava-mobile-hero-content h1 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .nava-mobile-hero-content p {
+            margin: 0 0 0.8rem;
+            font-size: 0.9rem;
+          }
+
+          .nava-mobile-hero-content a {
+            display: inline-flex;
+            padding: 0.55rem 1.2rem;
+            border-radius: 999px;
+            background: #fff;
+            color: #4b3826;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+          }
+
+          .nava-mobile-curations {
+            padding: 1.5rem 1.25rem 0;
+          }
+
+          .nava-mobile-category-bar {
+            display: flex;
+            gap: 0.6rem;
+            overflow-x: auto;
+            padding: 0.5rem 0 1rem;
+            margin: 0 1.25rem 1rem;
+          }
+
+          .nava-mobile-pill {
+            border: 1px solid rgba(181, 139, 70, 0.35);
+            background: #fff;
+            color: #4b3826;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+          }
+
+          .nava-mobile-pill.active {
+            background: #6b4a2d;
+            color: #fff7e6;
+            border-color: #6b4a2d;
+          }
+
+        .nava-mobile-products {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.75rem;
+          padding: 0 1.25rem 1.5rem;
+        }
+
+        .nava-mobile-product {
+          background: #fff;
+          border-radius: 14px;
+          padding: 0.4rem;
+          box-shadow: 0 10px 20px rgba(31, 18, 10, 0.12);
+        }
+
+        .nava-mobile-product .product-grid-card {
+          box-shadow: none;
+          border: none;
+        }
+
+        .nava-mobile-product .product-grid-top img {
+          height: 130px;
+          object-fit: cover;
+        }
+
+        .nava-mobile-product .product-grid-body {
+          padding: 0.4rem 0.2rem 0.5rem;
+        }
+
+        .nava-mobile-product .product-grid-title {
+          font-size: 0.85rem;
+          margin-bottom: 0.2rem;
+        }
+
+        .nava-mobile-products .skeleton-thumb {
+          height: 120px;
+        }
+
+          .nava-mobile-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid rgba(120, 91, 58, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0.75rem 0.6rem;
+            z-index: 90;
+          }
+
+          .nava-mobile-bottom a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            color: #4a1a23;
+            text-decoration: none;
+          }
+
+          .nava-mobile-bottom i {
+            font-size: 1.2rem;
+          }
+        }
+
+        .nava-home-hero {
+          min-height: 100vh;
+        }
+
+        @media (max-width: 768px) {
+          .nava-mobile-hero {
+            min-height: 320px;
+            align-items: center;
+            padding: 3.5rem 1.5rem;
+          }
+
+          .nava-mobile-hero::before {
+            background: linear-gradient(90deg, rgba(51, 35, 20, 0.7), rgba(51, 35, 20, 0.2));
+          }
+
+          .nava-mobile-hero-content {
+            max-width: 820px;
+            text-align: center;
+            padding: 0;
+          }
+        }
       `}</style>
 
-      <div className="nava-topbar">
-        <span>Free shipping on orders in Navathaniya</span>
-        <div className="nava-topbar-right">
-          <span>Need help? +91 98765 43210</span>
-          <a className="nava-admin-link" href="/admin/login" aria-label="Admin login">
-            <span>ADM</span>
-            Admin
-          </a>
+      <section className="nava-mobile-home">
+        <div className="nava-mobile-hero">
+          <div className="nava-mobile-hero-content">
+            <h1>Timeless Tradition.<br></br>Modern Living.</h1>
+            <p>Explore our diverse collection.</p>
+          </div>
         </div>
-      </div>
-      <div className="nava-header">
-        <div className="nava-brand">
-          Navathaniya
-          <small>Tradition Meets Everyday</small>
-        </div>
-        <div className="nava-search">
-          <input type="text" placeholder="Search products..." />
-          <button type="button">Search</button>
-        </div>
-        {/* <div className="nava-icons">
-          <span>Account</span>
-          <span>Wishlist</span>
-          <span>Cart</span>
-        </div> */}
-      </div>
-      <nav className="nava-nav">
-        <a href="/">Home</a>
-        <a href="#shop">Shop</a>
-        <a href="/about">About</a>
-        <a href="/contact">Contact</a>
-      </nav>
 
-      <section className="nava-hero">
-        <div className="nava-hero-content">
-          <span>Welcome to Navathaniya</span>
-          <h1>Tradition meets everyday essentials.</h1>
+        <section className="nava-mobile-curations">
+          <div className="nava-curations-header">
+            <h2>The Navathaniya Curations</h2>
+            <p>Signature collections that blend heritage with everyday ease.</p>
+          </div>
+          <div className="nava-curations-grid">
+            <div className="nava-curation-card curation-large">
+              <img className="nava-curation-image" src={curationImage} alt="Pooja room metalware" />
+              <div className="nava-curation-content">
+                <span>The Pooja Room</span>
+                <h3>Metalware &amp; Idols</h3>
+              </div>
+            </div>
+            <div className="nava-curation-card curation-top">
+              <img className="nava-curation-image" src={curationImage3} alt="Kitchen appliances and cookware" />
+              <div className="nava-curation-content">
+                <span>Kitchen Upgrades</span>
+                <h3>Appliances &amp; Cookware</h3>
+              </div>
+            </div>
+            <div className="nava-curation-card curation-bottom">
+              <img className="nava-curation-image" src={curationImage2} alt="Daily essentials garments and plastics" />
+              <div className="nava-curation-content">
+                <span>Daily Essentials</span>
+                <h3>Plastics &amp; Garments</h3>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="nava-mobile-category-bar">
+          <button
+            className={`nava-mobile-pill ${selectedCategory === "all" ? "active" : ""}`}
+            onClick={() => setSelectedCategory("all")}
+          >
+            All
+          </button>
+          {Object.entries(productsByCategory)
+            .filter(([categoryName, products]) => categoryName !== "Uncategorized" && products.length > 0)
+            .map(([categoryName]) => (
+              <button
+                key={categoryName}
+                className={`nava-mobile-pill ${selectedCategory === categoryName ? "active" : ""}`}
+                onClick={() => setSelectedCategory(categoryName)}
+              >
+                {categoryName}
+              </button>
+            ))}
+        </div>
+
+        <div className="nava-mobile-products">
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={`mobile-skeleton-${i}`} className="nava-mobile-product skeleton-card">
+                  <div className="skeleton-thumb"></div>
+                  <div className="skeleton-line"></div>
+                  <div className="skeleton-line short"></div>
+                </div>
+              ))
+            : mobileProducts.map((product, i) => (
+                  <div key={product._id || product.id || i} className="nava-mobile-product">
+                    <Card product={product} />
+                  </div>
+                ))}
+        </div>
+
+        {mobileTotalPages > 1 && (
+          <div className="nava-mobile-pagination">
+            {Array.from({ length: mobileTotalPages }).map((_, i) => (
+              <button
+                key={`mobile-page-${i + 1}`}
+                className={`nava-page-btn ${mobilePage === i + 1 ? "active" : ""}`}
+                onClick={() => setMobilePage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* <nav className="nava-mobile-bottom">
+        <a href="/">
+          <i className="bi bi-house"></i>
+          Home
+        </a>
+        <a href="#shop">
+          <i className="bi bi-grid"></i>
+          Categories
+        </a>
+        <a href="/cart">
+          <i className="bi bi-bag"></i>
+          Cart
+        </a>
+        <a href="/account">
+          <i className="bi bi-person"></i>
+          Profile
+        </a>
+      </nav> */}
+
+      <section className="nava-home-hero reveal-on-scroll">
+        <div className="nava-hero-overlay"></div>
+        <div className="nava-home-hero-content">
+          <h1>Timeless Tradition.<br></br>
+             Modern Living.</h1>
           <p>
-            Explore garments, kitchenware, electricals, and traditional items curated
-            for Navathaniya homes.
+            From handcrafted brassware to modern electronics, find everything
+            for your home and heritage.
           </p>
-          <a href="#shop">Shop Now</a>
+          <div className="nava-hero-actions">
+            <a href="#shop" className="nava-hero-primary">Shop Collections</a>
+            {/* <a href="/traditional" className="nava-hero-secondary">View Temple Items</a> */}
+          </div>
         </div>
       </section>
 
-      <div className="shop-container" id="shop">
-        <div className="main-content">
-          <div className="category-bar">
+      {/* <section className="nava-category-strip reveal-on-scroll">
+        <div className="nava-category-track">
+          <div className="nava-category-card">
+            <i className="bi bi-bag"></i>
+            <span>Garments</span>
+          </div>
+          <div className="nava-category-card">
+            <i className="bi bi-lightning-charge"></i>
+            <span>Electrical</span>
+          </div>
+          <div className="nava-category-card">
+            <i className="bi bi-box-seam"></i>
+            <span>Plastic</span>
+          </div>
+          <div className="nava-category-card">
+            <i className="bi bi-egg-fried"></i>
+            <span>Kitchen</span>
+          </div>
+          <div className="nava-category-card">
+            <i className="bi bi-stars"></i>
+            <span>Pooja</span>
+          </div>
+          <div className="nava-category-card">
+            <i className="bi bi-lamp"></i>
+            <span>Metalware</span>
+          </div>
+        </div>
+      </section> */}
+
+      <section className="nava-curations reveal-on-scroll">
+        <div className="nava-curations-header">
+          <h2>The Navathaniya Curations</h2>
+          <p>Signature collections that blend heritage with everyday ease.</p>
+        </div>
+        <div className="nava-curations-grid">
+          <div className="nava-curation-card curation-large">
+            <img className="nava-curation-image" src={curationImage} alt="Pooja room metalware" />
+            <div className="nava-curation-content">
+              <span>The Pooja Room</span>
+              <h3>Metalware &amp; Idols</h3>
+            </div>
+          </div>
+          <div className="nava-curation-card curation-top">
+            <img className="nava-curation-image" src={curationImage3} alt="Kitchen appliances and cookware" />
+            <div className="nava-curation-content">
+              <span>Kitchen Upgrades</span>
+              <h3>Appliances &amp; Cookware</h3>
+            </div>
+          </div>
+          <div className="nava-curation-card curation-bottom">
+            <img className="nava-curation-image" src={curationImage2} alt="Daily essentials garments and plastics" />
+            <div className="nava-curation-content">
+              <span>Daily Essentials</span>
+              <h3>Plastics &amp; Garments</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="nava-products" id="shop">
+        <div className="nava-products-inner">
+          <div className="nava-products-header">
+            <div>
+              <span className="nava-products-eyebrow">Navathaniya</span>
+              <h2>Explore our products</h2>
+            </div>
+            <p>Find garments, electricals, kitchenware, and traditional essentials.</p>
+          </div>
+
+          <div className="nava-products-filters">
             <button
-              className={`category-pill ${selectedCategory === "all" ? "active" : ""}`}
+              className={`nava-pill ${selectedCategory === "all" ? "active" : ""}`}
               onClick={() => setSelectedCategory("all")}
             >
-              All
-              <span className="category-pill-count">{allProducts.length}</span>
+              All Products
+              <span>{allProducts.length}</span>
             </button>
             {Object.entries(productsByCategory)
               .filter(([categoryName, products]) => categoryName !== "Uncategorized" && products.length > 0)
               .map(([categoryName, products]) => (
                 <button
                   key={categoryName}
-                  className={`category-pill ${selectedCategory === categoryName ? "active" : ""}`}
+                  className={`nava-pill ${selectedCategory === categoryName ? "active" : ""}`}
                   onClick={() => setSelectedCategory(categoryName)}
                 >
                   {categoryName}
-                  <span className="category-pill-count">{products.length}</span>
+                  <span>{products.length}</span>
                 </button>
               ))}
           </div>
-          {/* Single Category View */}
-          {selectedCategory !== "all" && productsByCategory[selectedCategory] && (
-            <div className="category-section">
-              <div className="category-header">
-                <h2 className="category-title">{selectedCategory}</h2>
-                <span className="product-count">{productsByCategory[selectedCategory].length} products available</span>
-              </div>
-              <div className="products-grid">
-                {productsByCategory[selectedCategory].map((product, i) => (
-                  <div key={i}>
+
+          <div className="nava-products-grid">
+            {loading
+              ? Array.from({ length: 10 }).map((_, i) => (
+                  <div key={`skeleton-${i}`} className="skeleton-card">
+                    <div className="skeleton-thumb"></div>
+                    <div className="skeleton-line"></div>
+                    <div className="skeleton-line short"></div>
+                  </div>
+                ))
+              : homeProducts.map((product, i) => (
+                  <div key={product._id || product.id || i}>
                     <Card product={product} />
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-          
-          {/* All Categories View */}
-          {selectedCategory === "all" && (
-            <div>
-              {Object.entries(productsByCategory)
-                .filter(([categoryName, products]) => categoryName !== "Uncategorized" && products.length > 0)
-                .map(([categoryName, products]) => (
-                  <div key={categoryName} className="category-section">
-                    <div className="category-header">
-                      <h3 className="category-title">{categoryName}</h3>
-                      <span className="product-count">{products.length} products available</span>
-                    </div>
-                    <div className="products-grid">
-                      {products.map((product, i) => (
-                        <div key={i}>
-                          <Card product={product} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-          
-          {/* Search Section */}
-          <div className="search-section">
-            <h3>Looking for something specific?</h3>
-            <p>Search across all our products</p>
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
           </div>
+
+          {displayProducts.length === 0 && (
+            <div className="text-center text-muted mt-4">
+              No products available in this category yet.
+            </div>
+          )}
+
+          {homeTotalPages > 1 && (
+            <div className="nava-pagination">
+              {Array.from({ length: homeTotalPages }).map((_, i) => (
+                <button
+                  key={`page-${i + 1}`}
+                  className={`nava-page-btn ${homePage === i + 1 ? "active" : ""}`}
+                  onClick={() => setHomePage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      </section>
     </Layout>
   );
 };

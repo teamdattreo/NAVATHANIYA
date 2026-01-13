@@ -57,7 +57,7 @@ export const createProduct = (product) => {
     });
 };
 
-export const getProducts = (page = 1, limit = 10) => {
+export const getProducts = (page = 1, limit = 1000) => {
   const query = `?page=${page}&limit=${limit}`;
   return fetch(`${API}/products${query}`, {
     method: "GET",

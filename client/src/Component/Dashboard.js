@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
-import { Link, useHistory } from "react-router-dom";
-import { getProducts } from "./api";
-import { getCategories } from "./api";
-import adminImage from "../img/admin.png";
-import { useAuth } from "../context/AuthContext";
+import { getCategories, getProducts } from "./api";
+import ShowImage from "./ShowImage";
 
 const Dashboard = () => {
-  const { logout } = useAuth();
-  const history = useHistory();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalCategories: 0,
     recentProducts: 0,
-    loading: true
+    newOrders: 0,
+    products: [],
+    loading: true,
   });
 
   useEffect(() => {
@@ -21,74 +19,57 @@ const Dashboard = () => {
       try {
         const productsData = await getProducts(1, 1000);
         const categoriesData = await getCategories();
-        
-        const products = productsData?.products || [];
-        const categories = categoriesData || [];
-        
-        // Calculate recent products (added in last 7 days)
+
+        const products = Array.isArray(productsData)
+          ? productsData
+          : productsData?.products || [];
+        const categories = Array.isArray(categoriesData) ? categoriesData : [];
+
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const recentProducts = products.filter(product => 
-          new Date(product.createdAt) > sevenDaysAgo
+        const recentProducts = products.filter(
+          (product) => new Date(product.createdAt) > sevenDaysAgo
         ).length;
+
+        const sortedProducts = [...products].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
 
         setStats({
           totalProducts: products.length,
           totalCategories: categories.length,
           recentProducts,
-          loading: false
+          newOrders: 0,
+          products: sortedProducts,
+          loading: false,
         });
       } catch (error) {
-        console.error('Error loading dashboard stats:', error);
-        setStats(prev => ({ ...prev, loading: false }));
+        console.error("Error loading dashboard stats:", error);
+        setStats((prev) => ({ ...prev, loading: false }));
       }
     };
 
     loadStats();
   }, []);
 
-  const StatCard = ({ title, value, icon, color, link, linkText }) => (
-    <div className="col-md-4 mb-4">
-      <div className="stat-card">
-        <div className="stat-icon" style={{ backgroundColor: color + '20', color: color }}>
-          <i className={`bi ${icon}`}></i>
-        </div>
-        <div className="stat-content">
-          <h3 className="stat-value">{stats.loading ? '...' : value}</h3>
-          <p className="stat-title">{title}</p>
-          <Link to={link} className="stat-link">
-            {linkText} <i className="bi bi-arrow-right ms-1"></i>
-          </Link>
-        </div>
+  const StatCard = ({ title, value, icon, accent, helper }) => (
+    <div className="admin-stat-card" style={{ background: accent }}>
+      <div className="admin-stat-icon">
+        <i className={`bi ${icon}`}></i>
+      </div>
+      <div>
+        <p className="admin-stat-title">{title}</p>
+        <h3 className="admin-stat-value">
+          {stats.loading ? "..." : Number(value).toLocaleString("en-US")}
+        </h3>
+        <span className="admin-stat-helper">{helper}</span>
       </div>
     </div>
   );
 
-  const QuickAction = ({ title, description, icon, link, color }) => (
-    <div className="col-md-6 col-lg-4 mb-4">
-      <Link to={link} className="quick-action-card">
-        <div className="action-icon" style={{ backgroundColor: color + '20', color: color }}>
-          <i className={`bi ${icon}`}></i>
-        </div>
-        <div className="action-content">
-          <h5 className="action-title">{title}</h5>
-          <p className="action-description">{description}</p>
-        </div>
-        <div className="action-arrow">
-          <i className="bi bi-arrow-right"></i>
-        </div>
-      </Link>
-    </div>
-  );
-
-  const handleLogout = () => {
-    logout();
-    history.push("/admin/login");
-  };
-
   if (stats.loading) {
     return (
-      <AdminLayout title="Dashboard" description="Loading..." className="container-fluid">
+      <AdminLayout title="Dashboard" description="Loading...">
         <div className="text-center py-5">
           <div className="nava-loader" role="status" aria-label="Loading">
             <span></span>
@@ -101,311 +82,276 @@ const Dashboard = () => {
   }
 
   return (
-    <AdminLayout
-      title="Admin Dashboard"
-      description="Welcome to NAVATHANIYA Admin Panel"
-      className="container-fluid dashboard-container"
-      footer={false}
-    >
+    <AdminLayout title="Admin Dashboard" description="Welcome to NAVATHANIYA Admin Panel">
       <style>{`
-        .dashboard-container {
-          background: #f7f1e6;
-          min-height: 100vh;
-        }
-        
-        .dashboard-header {
-          background: linear-gradient(90deg, rgba(43, 33, 23, 0.85), rgba(43, 33, 23, 0.35)),
-            url(${adminImage}) center/cover no-repeat;
-          color: #fff7e6;
-          padding: 2rem 0;
-          margin-bottom: 2rem;
-        }
-        
-        .dashboard-title {
-          font-size: 2.5rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-        }
-        
-        .dashboard-subtitle {
-          opacity: 0.9;
-          margin-bottom: 0;
+        .admin-stats {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
         }
 
-        .dashboard-actions {
+        .admin-stat-card {
+          border-radius: 16px;
+          padding: 1.2rem 1.3rem;
+          color: #fff;
           display: flex;
-          gap: 0.75rem;
+          gap: 0.9rem;
           align-items: center;
-          justify-content: flex-end;
-          margin-top: 1.25rem;
+          box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
         }
 
-        .dashboard-actions a,
-        .dashboard-actions button {
-          border: none;
-          background: rgba(255, 247, 230, 0.2);
-          color: #fff7e6;
+        .admin-stat-icon {
           width: 44px;
           height: 44px;
           border-radius: 12px;
+          background: rgba(255, 255, 255, 0.2);
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.1rem;
-          transition: transform 0.2s ease, background 0.2s ease;
+          font-size: 1.2rem;
         }
 
-        .dashboard-actions a:hover,
-        .dashboard-actions button:hover {
-          background: rgba(255, 247, 230, 0.35);
-          transform: translateY(-2px);
+        .admin-stat-title {
+          margin: 0;
+          font-size: 0.85rem;
+          opacity: 0.85;
         }
-        
-        .stat-card {
-          background: white;
-          border-radius: 1rem;
-          padding: 1.5rem;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-          border: 1px solid #f0f0f0;
-          transition: all 0.3s ease;
-          height: 100%;
-        }
-        
-        .stat-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .stat-icon {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 1rem;
-          font-size: 1.5rem;
-        }
-        
-        .stat-value {
-          font-size: 2.5rem;
+
+        .admin-stat-value {
+          margin: 0.15rem 0 0.2rem;
+          font-size: 1.6rem;
           font-weight: 700;
-          color: #2b2117;
-          margin-bottom: 0.5rem;
         }
-        
-        .stat-title {
-          color: #6b5845;
+
+        .admin-stat-helper {
+          font-size: 0.75rem;
+          opacity: 0.85;
+        }
+
+        .admin-panels {
+          display: grid;
+          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+          gap: 1.5rem;
+        }
+
+        .admin-panel h3 {
+          font-size: 1.05rem;
           margin-bottom: 1rem;
-          font-weight: 500;
-        }
-        
-        .stat-link {
-          color: #6d2735;
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.3s ease;
-        }
-        
-        .stat-link:hover {
-          color: #b8893b;
-        }
-        
-        .quick-action-card {
-          background: white;
-          border-radius: 1rem;
-          padding: 1.5rem;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-          border: 1px solid #f0f0f0;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          text-decoration: none;
-          color: inherit;
-          height: 100%;
-        }
-        
-        .quick-action-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-          text-decoration: none;
-          color: inherit;
-        }
-        
-        .action-icon {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: 1rem;
-          font-size: 1.25rem;
-        }
-        
-        .action-content {
-          flex-grow: 1;
-        }
-        
-        .action-title {
-          color: #2b2117;
+          color: #1e293b;
           font-weight: 600;
-          margin-bottom: 0.5rem;
         }
-        
-        .action-description {
-          color: #6b5845;
-          margin-bottom: 0;
+
+        .admin-action {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 0.6rem 0.8rem;
+          margin-bottom: 0.7rem;
+          text-decoration: none;
+          color: #1e293b;
           font-size: 0.9rem;
+          background: #f8fafc;
         }
-        
-        .action-arrow {
-          color: #6d2735;
-          font-size: 1.25rem;
-          transition: transform 0.3s ease;
+
+        .admin-action i {
+          color: #2563eb;
         }
-        
-        .quick-action-card:hover .action-arrow {
-          transform: translateX(5px);
+
+        .admin-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.88rem;
         }
-        
-        .section-title {
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: #2b2117;
-          margin-bottom: 1.5rem;
-          position: relative;
-          padding-bottom: 0.5rem;
+
+        .admin-table th {
+          text-align: left;
+          color: #64748b;
+          font-weight: 600;
+          padding-bottom: 0.75rem;
         }
-        
-        .section-title::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 50px;
-          height: 3px;
-          background: linear-gradient(135deg, #b8893b 0%, #6d2735 100%);
-          border-radius: 2px;
+
+        .admin-table td {
+          padding: 0.65rem 0;
+          border-top: 1px solid #edf2f7;
+          color: #1e293b;
+        }
+
+        .admin-table .product-grid-image {
+          width: 38px;
+          height: 38px;
+          border-radius: 10px;
+          overflow: hidden;
+          background: #f1f5f9;
+        }
+
+        .admin-table .product-grid-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .admin-table-actions {
+          display: flex;
+          gap: 0.4rem;
+        }
+
+        .admin-table-actions button {
+          width: 28px;
+          height: 28px;
+          border-radius: 8px;
+          border: none;
+          background: #f1f5f9;
+          color: #475569;
+        }
+
+        .admin-table-footer {
+          display: flex;
+          justify-content: center;
+          margin-top: 1rem;
+        }
+
+        .admin-table-footer a {
+          text-decoration: none;
+          background: #1e3658;
+          color: #f8fafc;
+          padding: 0.45rem 1rem;
+          border-radius: 999px;
+          font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+          .admin-panels {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .admin-stats {
+            grid-template-columns: 1fr;
+          }
+
+          .admin-panels {
+            gap: 1.2rem;
+          }
+
+          .admin-table {
+            font-size: 0.82rem;
+          }
+
+          .admin-table th:nth-child(3),
+          .admin-table td:nth-child(3) {
+            display: none;
+          }
+        }
+
+        @media (max-width: 576px) {
+          .admin-table th:nth-child(5),
+          .admin-table td:nth-child(5) {
+            display: none;
+          }
         }
       `}</style>
 
-      {/* Dashboard Header */}
-      <div className="dashboard-header">
-        <div className="container">
-          <h1 className="dashboard-title">
-            <i className="bi bi-speedometer2 me-3"></i>
-            Admin Dashboard
-          </h1>
-          <p className="dashboard-subtitle">Manage your NAVATHANIYA store with ease</p>
-          <div className="dashboard-actions">
-            <a href="/" title="View Store" aria-label="View Store">
-              <i className="bi bi-house"></i>
-            </a>
-            <button type="button" onClick={handleLogout} title="Logout" aria-label="Logout">
-              <i className="bi bi-box-arrow-right"></i>
-            </button>
-          </div>
-        </div>
+      <div className="admin-stats">
+        <StatCard
+          title="Total Products"
+          value={stats.totalProducts}
+          icon="bi-box-seam"
+          accent="linear-gradient(135deg, #5f5ce6, #4f46e5)"
+          helper="Active"
+        />
+        <StatCard
+          title="Total Categories"
+          value={stats.totalCategories}
+          icon="bi-folder2"
+          accent="linear-gradient(135deg, #fb923c, #f97316)"
+          helper="Active"
+        />
+        <StatCard
+          title="New This Week"
+          value={stats.recentProducts}
+          icon="bi-calendar2-week"
+          accent="linear-gradient(135deg, #14b8a6, #0ea5a4)"
+          helper="Products & Categories"
+        />
+        {/* <StatCard
+          title="New Orders This Week"
+          value={stats.newOrders}
+          icon="bi-cart-check"
+          accent="linear-gradient(135deg, #f43f5e, #ec4899)"
+          helper="Processed"
+        /> */}
       </div>
 
-      <div className="container">
-        {/* Statistics Cards */}
-        <div className="row mb-4">
-          <StatCard
-            title="Total Products"
-            value={stats.totalProducts}
-            icon="bi-box-seam"
-            color="#2E7D32"
-            link="/products"
-            linkText="Manage Products"
-          />
-          <StatCard
-            title="Categories"
-            value={stats.totalCategories}
-            icon="bi-tags"
-            color="#43A047"
-            link="/create/category"
-            linkText="Manage Categories"
-          />
-          <StatCard
-            title="New This Week"
-            value={stats.recentProducts}
-            icon="bi-graph-up"
-            color="#d32f2f"
-            link="/create/product"
-            linkText="Add Product"
-          />
+      <div className="admin-panels">
+        <div className="admin-panel">
+          <h3>Quick Actions</h3>
+          <Link to="/create/product" className="admin-action">
+            <span>
+              <i className="bi bi-plus-circle me-2"></i>
+              Create New Product
+            </span>
+            <i className="bi bi-arrow-right"></i>
+          </Link>
+          <Link to="/create/category" className="admin-action">
+            <span>
+              <i className="bi bi-folder-plus me-2"></i>
+              Create New Category
+            </span>
+            <i className="bi bi-arrow-right"></i>
+          </Link>
         </div>
 
-        {/* Quick Actions */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <h2 className="section-title">Quick Actions</h2>
+        <div className="admin-panel">
+          <h3>Recent Products</h3>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.products.slice(0, 4).map((product) => (
+                <tr key={product._id}>
+                  <td>
+                    <ShowImage item={product} url="product" />
+                  </td>
+                  <td>{product.name}</td>
+                  <td>{product.category?.name || "General"}</td>
+                  <td>Rs.{product.price}</td>
+                  <td>{product.quantity || 0}</td>
+                  <td>
+                    <div className="admin-table-actions">
+                      <button type="button" aria-label="Edit">
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                      <button type="button" aria-label="Delete">
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {stats.products.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{ color: "#94a3b8", paddingTop: "1rem" }}>
+                    No products found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <div className="admin-table-footer">
+            <Link to="/products">View All Products</Link>
           </div>
-          <QuickAction
-            title="Create Category"
-            description="Add new product categories"
-            icon="bi-plus-circle"
-            link="/create/category"
-            color="#43A047"
-          />
-          <QuickAction
-            title="Add Product"
-            description="Create new product listings"
-            icon="bi-box"
-            link="/create/product"
-            color="#2E7D32"
-          />
-          <QuickAction
-            title="Manage Products"
-            description="Edit or delete existing products"
-            icon="bi-gear"
-            link="/products"
-            color="#d32f2f"
-          />
         </div>
-
-        {/* Recent Activity
-        <div className="row">
-          <div className="col-12">
-            <h2 className="section-title">System Overview</h2>
-            <div className="card border-0 shadow-sm">
-              <div className="card-body">
-                <div className="row text-center">
-                  <div className="col-md-3 mb-3">
-                    <div className="system-stat">
-                      <i className="bi bi-check-circle text-success" style={{ fontSize: '2rem' }}></i>
-                      <h4 className="mt-2">System Active</h4>
-                      <p className="text-muted">All systems operational</p>
-                    </div>
-                  </div>
-                  <div className="col-md-3 mb-3">
-                    <div className="system-stat">
-                      <i className="bi bi-database text-info" style={{ fontSize: '2rem' }}></i>
-                      <h4 className="mt-2">Database</h4>
-                      <p className="text-muted">Connected & healthy</p>
-                    </div>
-                  </div>
-                  <div className="col-md-3 mb-3">
-                    <div className="system-stat">
-                      <i className="bi bi-shield-check text-primary" style={{ fontSize: '2rem' }}></i>
-                      <h4 className="mt-2">Security</h4>
-                      <p className="text-muted">Authentication enabled</p>
-                    </div>
-                  </div>
-                  <div className="col-md-3 mb-3">
-                    <div className="system-stat">
-                      <i className="bi bi-clock text-warning" style={{ fontSize: '2rem' }}></i>
-                      <h4 className="mt-2">Last Update</h4>
-                      <p className="text-muted">Just now</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
       </div>
     </AdminLayout>
   );

@@ -49,9 +49,9 @@ const AdminLogin = () => {
             <img src={adminImage} alt="Navathaniya admin login" />
           </div>
           <div className="login-header">
-            <div className="logo-circle">
+            {/* <div className="logo-circle">
               <i className="bi bi-shield-lock"></i>
-            </div>
+            </div> */}
             <h2 className="login-title">Admin Portal</h2>
             <p className="login-subtitle">NAVATHANIYA Administration</p>
           </div>

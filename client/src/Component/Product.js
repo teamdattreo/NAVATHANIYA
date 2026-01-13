@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Layout from "./Layout";
 import { read, getProducts } from "./api";
 import Card from "./Card";
@@ -10,47 +11,7 @@ const Product = (props) => {
   const [error, setError] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const getCategoryTiles = () => {
-    const tiles = new Map();
-    if (product && product.category) {
-      const key = product.category._id || product.category.name;
-      tiles.set(key, { label: product.category.name || "Category", item: product });
-    }
-    relatedProducts.forEach((item) => {
-      if (!item || !item.category) {
-        return;
-      }
-      const key = item.category._id || item.category.name;
-      if (!tiles.has(key)) {
-        tiles.set(key, { label: item.category.name || "Category", item });
-      }
-    });
-    return Array.from(tiles.values());
-  };
-
-  const getCategoryGroups = () => {
-    const groups = new Map();
-    const addItem = (item) => {
-      if (!item || !item.category) {
-        return;
-      }
-      const key = item.category._id || item.category.name || "General";
-      if (!groups.has(key)) {
-        groups.set(key, { name: item.category.name || "General", items: [] });
-      }
-      const group = groups.get(key);
-      if (!group.items.find((entry) => entry._id === item._id)) {
-        group.items.push(item);
-      }
-    };
-
-    addItem(product);
-    relatedProducts.forEach(addItem);
-    return Array.from(groups.values()).map((group) => ({
-      ...group,
-      items: group.items.filter((item) => item._id !== product._id).slice(0, 8),
-    }));
-  };
+  const getRelatedProducts = () => relatedProducts.slice(0, 8);
 
   const loadRelatedProducts = (currentProduct) => {
     getProducts(1, 1000).then((data) => {
@@ -100,135 +61,84 @@ const Product = (props) => {
     >
       <style>{`
         .product-hero {
-          margin: 0 2rem 2rem;
-          border-radius: 22px;
-          overflow: hidden;
-          position: relative;
-          min-height: 200px;
-          background: url(${heroImage}) center/cover no-repeat;
+          margin: 0;
+          min-height: 140px;
+          background: linear-gradient(135deg, rgba(181, 139, 70, 0.25), rgba(107, 74, 45, 0.15));
           display: flex;
           align-items: center;
-        }
-
-        .product-hero::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(90deg, rgba(31, 26, 23, 0.75), rgba(31, 26, 23, 0.1));
+          justify-content: center;
         }
 
         .product-hero-content {
-          position: relative;
-          z-index: 1;
-          padding: 2.5rem;
-          color: #fffdf8;
-          max-width: 600px;
+          padding: 2rem 1.5rem;
+          text-align: center;
+          color: #4b3826;
         }
 
         .product-hero-content span {
           text-transform: uppercase;
           letter-spacing: 0.2em;
           font-size: 0.7rem;
-          color: rgba(255, 253, 248, 0.8);
+          color: rgba(75, 56, 38, 0.7);
         }
 
         .product-hero-content h1 {
-          margin: 0.6rem 0 0;
-          font-size: 2.1rem;
+          margin: 0.5rem 0 0;
+          font-size: 2rem;
           font-weight: 700;
         }
 
         .product-wrapper {
-          padding: 0 2rem 2.5rem;
+          padding: 0 1rem 1.75rem;
           display: flex;
           justify-content: center;
+          background: #f7f1e3;
         }
 
         .product-detail-card {
-          width: min(980px, 100%);
-          background: #fffdf8;
-          border: 1px solid rgba(120, 91, 58, 0.18);
-          border-radius: 20px;
-          padding: 2rem;
-          box-shadow: 0 16px 32px rgba(43, 33, 23, 0.12);
+          width: min(820px, 100%);
+          background: #fdf6e6;
+          border: 1px solid rgba(181, 139, 70, 0.2);
+          border-radius: 18px;
+          padding: 1.25rem;
+          box-shadow: 0 22px 36px rgba(43, 33, 23, 0.12);
         }
 
         .product-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-          gap: 2rem;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+          gap: 1.5rem;
           align-items: start;
         }
 
         .product-media {
-          background: #f5efe7;
-          border-radius: 18px;
-          padding: 2rem;
+          background: #efe5d3;
+          border-radius: 14px;
+          padding: 1rem;
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 360px;
-          position: relative;
-        }
-
-        .product-media::after {
-          content: "";
-          position: absolute;
-          right: 18px;
-          top: 18px;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          border: 1px solid rgba(120, 91, 58, 0.3);
+          min-height: 220px;
         }
 
         .product-info h2 {
-          font-size: 2rem;
+          font-size: 1.35rem;
           font-weight: 700;
-          color: #2b2117;
-          margin-bottom: 0.6rem;
+          color: #4b3826;
+          margin-bottom: 0.4rem;
         }
 
         .product-info .product-price {
-          font-size: 1.4rem;
+          font-size: 0.95rem;
           font-weight: 700;
-          color: #6d2735;
+          color: #6b4a2d;
           margin-bottom: 0.75rem;
         }
 
         .product-info p {
           color: #5c4632;
           line-height: 1.6;
-        }
-
-        .product-divider {
-          margin: 1.5rem 0;
-          height: 1px;
-          background: rgba(120, 91, 58, 0.2);
-        }
-
-        .product-actions {
-          display: flex;
-          gap: 0.75rem;
-          align-items: center;
-        }
-
-        .product-qty {
-          width: 70px;
-          border: 1px solid rgba(120, 91, 58, 0.3);
-          border-radius: 10px;
-          padding: 0.45rem 0.6rem;
-          background: #fffdf8;
-        }
-
-        .product-buy {
-          flex: 1;
-          border: none;
-          padding: 0.6rem 1rem;
-          border-radius: 10px;
-          background: #6d2735;
-          color: #fffdf8;
-          font-weight: 600;
+          font-size: 0.95rem;
         }
 
         .product-meta {
@@ -238,57 +148,49 @@ const Product = (props) => {
         }
 
         .related-section {
-          margin-top: 2.5rem;
+          margin-top: 2rem;
         }
 
         .related-title {
-          font-size: 1.4rem;
+          font-size: 1.05rem;
           font-weight: 700;
-          color: #2b2117;
+          color: #4b3826;
           margin-bottom: 1rem;
-        }
-
-        .related-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-          gap: 1.25rem;
-        }
-
-        .category-gallery {
-          margin-top: 2.5rem;
-        }
-
-        .category-gallery h3 {
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: #2b2117;
-          margin-bottom: 1rem;
-        }
-
-        .category-gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-          gap: 1rem;
-        }
-
-        .category-gallery-card {
-          background: #fff7ec;
-          border: 1px solid rgba(120, 91, 58, 0.18);
-          border-radius: 16px;
-          padding: 1rem;
           text-align: center;
         }
 
-        .category-gallery-card .product-grid-image {
-          height: 120px;
+        .related-title span {
+          display: inline-block;
+          padding-bottom: 0.35rem;
+          border-bottom: 2px solid rgba(181, 139, 70, 0.6);
         }
 
-        .category-gallery-card h4 {
-          margin-top: 0.75rem;
-          font-size: 0.95rem;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: #5c4632;
+        .recommended-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+        }
+
+        .recommended-grid .product-grid-card {
+          height: 100%;
+        }
+
+        .recommended-card h4 {
+          margin: 0.75rem 0 0;
+          font-size: 0.85rem;
+          color: #4b3826;
+        }
+
+        .recommended-meta {
+          font-size: 0.8rem;
+          color: #6b5845;
+        }
+
+        .recommended-price {
+          display: inline-block;
+          margin-top: 0.25rem;
+          font-weight: 700;
+          color: #6b4a2d;
         }
 
         @media (max-width: 900px) {
@@ -298,57 +200,37 @@ const Product = (props) => {
         }
 
         @media (max-width: 768px) {
-          .product-hero {
-            margin: 0 1rem 1.5rem;
-          }
-
-          .product-hero-content {
-            padding: 2rem;
-          }
-
           .product-hero-content h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
           }
 
           .product-wrapper {
             padding: 0 1rem 2rem;
           }
 
-          .related-grid {
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-          }
-
-          .category-gallery-grid {
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          .recommended-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
           }
         }
 
         @media (max-width: 576px) {
-          .product-hero {
-            margin: 0 0.5rem 1.25rem;
-          }
-
           .product-wrapper {
             padding: 0 0.75rem 1.5rem;
           }
 
-          .related-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .category-gallery-grid {
+          .recommended-grid {
             grid-template-columns: 1fr;
           }
         }
       `}</style>
 
-      <section className="product-hero">
+      {/* <section className="product-hero">
         <div className="product-hero-content">
           <span>Product details</span>
           <h1>{product && product.name ? product.name : "Loading product..."}</h1>
         </div>
-      </section>
-
+      </section> */}
+<br></br>
       <div className="product-wrapper">
         <div className="product-detail-card">
           {product && product.description && (
@@ -361,48 +243,28 @@ const Product = (props) => {
                   <h2>{product.name}</h2>
                   <div className="product-price">Rs.{product.price}</div>
                   <p>{product.description}</p>
-                  <div className="product-divider"></div>
-                  <div className="product-actions">
-                    <input type="number" min="1" defaultValue="1" className="product-qty" />
-                    <button type="button" className="product-buy">Add to Cart</button>
-                  </div>
                   <div className="product-meta">
                     Categories: {product.category ? product.category.name : "General"}
                   </div>
                 </div>
               </div>
-              {/* {relatedProducts.length > 0 && (
-                <div className="related-section">
-                  <h3 className="related-title">Related Products</h3>
-                  <div className="related-grid">
-                    {relatedProducts.map((item) => (
-                      <Card key={item._id} product={item} />
-                    ))}
-                  </div>
-                </div>
-              )} */}
             </>
           )}
         </div>
       </div>
-      {getCategoryGroups().length > 0 && (
-        <div className="category-gallery product-wrapper">
+      {getRelatedProducts().length > 0 && (
+        <div className="product-wrapper">
           <div className="product-detail-card">
-            {/* <h3>More from these categories</h3> */}
-            {getCategoryGroups().map((group) => (
-              <div key={group.name} className="related-section">
-                <h3 className="related-title">{group.name}</h3>
-                {group.items.length > 0 ? (
-                  <div className="related-grid">
-                    {group.items.map((item) => (
-                      <Card key={item._id} product={item} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="product-meta">No other products available.</p>
-                )}
+            <div className="related-section">
+              <h3 className="related-title">
+                <span>Recommended Products</span>
+              </h3>
+              <div className="recommended-grid">
+                {getRelatedProducts().map((item) => (
+                  <Card key={item._id} product={item} />
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       )}

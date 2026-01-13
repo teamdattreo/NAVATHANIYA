@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import { Link } from "react-router-dom";
 import { getProducts, deleteProduct } from "./api";
-import adminImage from "../img/admin.png";
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -10,12 +9,13 @@ const ManageProducts = () => {
   const [error, setError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   const loadProducts = () => {
     setLoading(true);
     setError("");
-    getProducts().then((data) => {
+    getProducts(1, 1000).then((data) => {
       if (data.error) {
         setError(data.error);
         console.log(data.error);
@@ -34,12 +34,23 @@ const ManageProducts = () => {
   };
 
   useEffect(() => {
-    const filtered = products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = products.filter(product => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const categoryName = product.category?.name || "Uncategorized";
+      const matchesCategory =
+        selectedCategory === "all" || categoryName === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
     setFilteredProducts(filtered);
-  }, [searchTerm, products]);
+  }, [searchTerm, selectedCategory, products]);
+
+  const categoryOptions = Array.from(
+    new Set(
+      products.map((product) => product.category?.name || "Uncategorized")
+    )
+  );
 
   const destroy = (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {
@@ -182,11 +193,7 @@ const ManageProducts = () => {
   );
 
   return (
-    <AdminLayout
-      title="Manage Products"
-      description="Manage NAVATHANIYA product inventory"
-      className="container-fluid py-4"
-    >
+    <AdminLayout title="Manage Products" description="Manage NAVATHANIYA product inventory">
       <style>{`
         @keyframes fadeInUp {
           from {
@@ -208,15 +215,6 @@ const ManageProducts = () => {
           box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
         }
         
-        .page-header {
-          background: linear-gradient(90deg, rgba(43, 33, 23, 0.85), rgba(43, 33, 23, 0.35)),
-            url(${adminImage}) center/cover no-repeat;
-          color: #fff7e6;
-          padding: 2rem 0;
-          margin-bottom: 2rem;
-          border-radius: 0.5rem;
-        }
-        
         .search-box {
           position: relative;
         }
@@ -232,55 +230,79 @@ const ManageProducts = () => {
           transform: translateY(-50%);
           color: #6c757d;
         }
+
+        .category-filter {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0.35rem 0.6rem;
+          background: #f8fafc;
+          color: #64748b;
+          font-size: 0.85rem;
+        }
+
+        .category-filter select {
+          border: none;
+          background: transparent;
+          font-size: 0.9rem;
+          color: #1e293b;
+        }
+
+        .category-filter select:focus {
+          outline: none;
+        }
       `}</style>
-      
-      <div className="page-header mb-4">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-md-6">
-              <h1 className="mb-2">
-                <i className="bi bi-box-seam me-3"></i>
-                Product Management
-              </h1>
-              <p className="mb-0 opacity-75">
-                Manage your inventory with ease
-              </p>
-            </div>
-            <div className="col-md-6 text-md-end mt-3 mt-md-0">
-              <div className="d-inline-flex gap-2 align-items-center">
-                <div className="text-end">
-                  <div className="h4 mb-0">{filteredProducts.length}</div>
-                  <small className="opacity-75">Total Products</small>
-                </div>
-                <Link to="/create/product" className="btn btn-primary">
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add Product
-                </Link>
-              </div>
-            </div>
+
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Product Management</h1>
+          <p className="admin-page-subtitle">Manage your inventory with ease.</p>
+        </div>
+        <div className="d-flex align-items-center gap-3">
+          <div className="text-end">
+            <div className="h4 mb-0">{filteredProducts.length}</div>
+            <small className="text-muted">Total Products</small>
           </div>
+          <Link to="/create/product" className="btn btn-primary">
+            <i className="bi bi-plus-circle me-2"></i>
+            Add Product
+          </Link>
         </div>
       </div>
-      
-      <div className="container">
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="search-box">
-              <i className="bi bi-search"></i>
-              <input
-                type="text"
-                className="form-control form-control-lg"
-                placeholder="Search products by name or description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+
+      <div className="admin-panel">
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+          <div className="search-box flex-grow-1">
+            <i className="bi bi-search"></i>
+            <input
+              type="text"
+              className="form-control form-control-lg"
+              placeholder="Search products by name or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="category-filter">
+            <i className="bi bi-funnel"></i>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-        
+
         {showError()}
         {showLoading()}
-        
+
         {!loading && !error && filteredProducts.length > 0 && (
           <div className="row">
             {filteredProducts.map((product, index) => (
@@ -288,7 +310,7 @@ const ManageProducts = () => {
             ))}
           </div>
         )}
-        
+
         {showEmptyState()}
       </div>
     </AdminLayout>
