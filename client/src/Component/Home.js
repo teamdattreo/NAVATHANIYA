@@ -15,6 +15,7 @@ const Home = () => {
   const [productsByCategory, setProductsByCategory] = useState({});
   const [categoryPages, setCategoryPages] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [error, setError] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -386,31 +387,52 @@ const Home = () => {
       ? filteredProducts
       : productsByCategory[selectedCategory] || [];
 
+  const subcategorySource =
+    selectedCategory === "all"
+      ? displayProducts
+      : productsByCategory[selectedCategory] || [];
+
+  const subcategoryOptions = Array.from(
+    new Set(
+      subcategorySource.map(
+        (product) => product.subcategory?.name || "Uncategorized"
+      )
+    )
+  ).filter((name) => !(selectedCategory !== "all" && name === "Uncategorized"));
+
+  const filteredBySubcategory =
+    selectedSubcategory === "all"
+      ? displayProducts
+      : displayProducts.filter(
+          (product) => product.subcategory?.name === selectedSubcategory
+        );
+
   const [homePage, setHomePage] = useState(1);
   const homeTotalPages = Math.max(
     1,
-    Math.ceil(displayProducts.length / HOME_PRODUCTS_PER_PAGE)
+    Math.ceil(filteredBySubcategory.length / HOME_PRODUCTS_PER_PAGE)
   );
   const homeStartIndex = (homePage - 1) * HOME_PRODUCTS_PER_PAGE;
   const homeEndIndex = homeStartIndex + HOME_PRODUCTS_PER_PAGE;
-  const homeProducts = displayProducts.slice(homeStartIndex, homeEndIndex);
+  const homeProducts = filteredBySubcategory.slice(homeStartIndex, homeEndIndex);
 
   useEffect(() => {
     setHomePage(1);
+    setSelectedSubcategory("all");
   }, [selectedCategory, displayProducts.length]);
 
   const [mobilePage, setMobilePage] = useState(1);
   const mobileTotalPages = Math.max(
     1,
-    Math.ceil(displayProducts.length / MOBILE_PRODUCTS_PER_PAGE)
+    Math.ceil(filteredBySubcategory.length / MOBILE_PRODUCTS_PER_PAGE)
   );
   const mobileStartIndex = (mobilePage - 1) * MOBILE_PRODUCTS_PER_PAGE;
   const mobileEndIndex = mobileStartIndex + MOBILE_PRODUCTS_PER_PAGE;
-  const mobileProducts = displayProducts.slice(mobileStartIndex, mobileEndIndex);
+  const mobileProducts = filteredBySubcategory.slice(mobileStartIndex, mobileEndIndex);
 
   useEffect(() => {
     setMobilePage(1);
-  }, [selectedCategory, displayProducts.length]);
+  }, [selectedCategory, displayProducts.length, selectedSubcategory]);
 
   return (
     <Layout
@@ -1043,6 +1065,16 @@ const Home = () => {
           margin-bottom: 2rem;
         }
 
+        .nava-subcategory-select {
+          border: 1px solid rgba(120, 91, 58, 0.35);
+          background: #fffdf8;
+          color: #4b3826;
+          padding: 0.45rem 0.9rem;
+          border-radius: 999px;
+          font-weight: 600;
+          font-size: 0.85rem;
+        }
+
         .nava-pill {
           border: 1px solid rgba(120, 91, 58, 0.35);
           background: #fffdf8;
@@ -1563,6 +1595,20 @@ const Home = () => {
             border-color: #6b4a2d;
           }
 
+          .nava-mobile-subcategory {
+            margin: 0 1.25rem 1rem;
+          }
+
+          .nava-mobile-subcategory select {
+            width: 100%;
+            border: 1px solid rgba(181, 139, 70, 0.35);
+            border-radius: 999px;
+            padding: 0.5rem 0.9rem;
+            background: #fff;
+            color: #4b3826;
+            font-size: 0.8rem;
+          }
+
         .nava-mobile-products {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1708,6 +1754,22 @@ const Home = () => {
               </button>
             ))}
         </div>
+
+        {selectedCategory !== "all" && subcategoryOptions.length > 0 && (
+          <div className="nava-mobile-subcategory">
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+            >
+              <option value="all">All Sub Categories</option>
+              {subcategoryOptions.map((subcategory) => (
+                <option key={subcategory} value={subcategory}>
+                  {subcategory}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="nava-mobile-products">
           {loading
@@ -1864,6 +1926,20 @@ const Home = () => {
                   <span>{products.length}</span>
                 </button>
               ))}
+            {selectedCategory !== "all" && subcategoryOptions.length > 0 && (
+              <select
+                className="nava-subcategory-select"
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+              >
+                <option value="all">All Sub Categories</option>
+                {subcategoryOptions.map((subcategory) => (
+                  <option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="nava-products-grid">
@@ -1882,7 +1958,7 @@ const Home = () => {
                 ))}
           </div>
 
-          {displayProducts.length === 0 && (
+          {filteredBySubcategory.length === 0 && (
             <div className="text-center text-muted mt-4">
               No products available in this category yet.
             </div>

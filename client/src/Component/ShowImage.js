@@ -9,6 +9,8 @@ const ShowImage = ({ item, url }) => {
         src={src}
         alt={item.name}
         className="product-grid-img"
+        loading="lazy"
+        decoding="async"
       />
     </div>
   );

@@ -10,6 +10,7 @@ const ManageProducts = () => {
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   const loadProducts = () => {
@@ -41,14 +42,34 @@ const ManageProducts = () => {
       const categoryName = product.category?.name || "Uncategorized";
       const matchesCategory =
         selectedCategory === "all" || categoryName === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const subcategoryName = product.subcategory?.name || "Uncategorized";
+      const matchesSubcategory =
+        selectedSubcategory === "all" ||
+        (selectedCategory !== "all" && subcategoryName === selectedSubcategory);
+      return matchesSearch && matchesCategory && matchesSubcategory;
     });
     setFilteredProducts(filtered);
-  }, [searchTerm, selectedCategory, products]);
+  }, [searchTerm, selectedCategory, selectedSubcategory, products]);
+
+  useEffect(() => {
+    setSelectedSubcategory("all");
+  }, [selectedCategory]);
 
   const categoryOptions = Array.from(
     new Set(
       products.map((product) => product.category?.name || "Uncategorized")
+    )
+  );
+
+  const subcategoryOptions = Array.from(
+    new Set(
+      products
+        .filter((product) =>
+          selectedCategory === "all"
+            ? false
+            : (product.category?.name || "Uncategorized") === selectedCategory
+        )
+        .map((product) => product.subcategory?.name || "Uncategorized")
     )
   );
 
@@ -130,6 +151,12 @@ const ManageProducts = () => {
                 <i className="bi bi-tag me-1"></i>
                 {product.category?.name || 'Uncategorized'}
               </p>
+              {product.subcategory?.name && (
+                <p className="text-muted small mb-2">
+                  <i className="bi bi-diagram-2 me-1"></i>
+                  {product.subcategory.name}
+                </p>
+              )}
             </div>
             <span className="badge bg-success rounded-pill">
               ${product.price}
@@ -253,6 +280,29 @@ const ManageProducts = () => {
         .category-filter select:focus {
           outline: none;
         }
+
+        .subcategory-filter {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0.35rem 0.6rem;
+          background: #f8fafc;
+          color: #64748b;
+          font-size: 0.85rem;
+        }
+
+        .subcategory-filter select {
+          border: none;
+          background: transparent;
+          font-size: 0.9rem;
+          color: #1e293b;
+        }
+
+        .subcategory-filter select:focus {
+          outline: none;
+        }
       `}</style>
 
       <div className="admin-page-header">
@@ -298,6 +348,22 @@ const ManageProducts = () => {
               ))}
             </select>
           </div>
+          {subcategoryOptions.length > 0 && (
+            <div className="subcategory-filter">
+              <i className="bi bi-diagram-2"></i>
+              <select
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+              >
+                <option value="all">All Sub Categories</option>
+                {subcategoryOptions.map((subcategory) => (
+                  <option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {showError()}

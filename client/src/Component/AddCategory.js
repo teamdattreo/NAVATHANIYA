@@ -84,14 +84,15 @@ const AddCategory = () => {
       </div>
 
       <div className="form-group">
-        <label className="text-muted">Super Category</label>
+        <label className="text-muted">Parent Category (optional)</label>
         <select
           onChange={handleChange("super_category")}
           className="form-control"
         >
           <option>Select</option>
-          {categories &&
-            categories.map((c, i) => (
+          {categories
+            .filter((c) => !c.super_category)
+            .map((c, i) => (
               <option key={i} value={c._id}>
                 {c.name}
               </option>
@@ -154,6 +155,42 @@ const AddCategory = () => {
           display: block;
         }
 
+        .category-list {
+          display: grid;
+          gap: 1rem;
+        }
+
+        .category-group {
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        .category-group:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+
+        .category-parent {
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 0.5rem;
+        }
+
+        .category-children {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .category-chip {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 999px;
+          padding: 0.25rem 0.7rem;
+          font-size: 0.85rem;
+          color: #475569;
+        }
+
         @media (max-width: 900px) {
           .admin-form-grid {
             grid-template-columns: 1fr;
@@ -181,6 +218,38 @@ const AddCategory = () => {
           {showError()}
           {newCategoryFom()}
           {goBack()}
+        </div>
+      </div>
+
+      <div className="admin-panel">
+        <h3>Category List</h3>
+        <div className="category-list">
+          {categories.length === 0 && (
+            <p className="text-muted mb-0">No categories yet.</p>
+          )}
+          {categories
+            .filter((cat) => !cat.super_category)
+            .map((parent) => {
+              const subs = categories.filter(
+                (child) => String(child.super_category) === String(parent._id)
+              );
+              return (
+                <div key={parent._id} className="category-group">
+                  <div className="category-parent">{parent.name}</div>
+                  {subs.length > 0 ? (
+                    <div className="category-children">
+                      {subs.map((sub) => (
+                        <span key={sub._id} className="category-chip">
+                          {sub.name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="category-children text-muted">No sub categories</div>
+                  )}
+                </div>
+              );
+            })}
         </div>
       </div>
     </AdminLayout>

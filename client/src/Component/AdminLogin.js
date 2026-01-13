@@ -52,7 +52,7 @@ const AdminLogin = () => {
             {/* <div className="logo-circle">
               <i className="bi bi-shield-lock"></i>
             </div> */}
-            <h2 className="login-title">Admin Portal</h2>
+            <h2 className="login-title"></h2>
             <p className="login-subtitle">NAVATHANIYA Administration</p>
           </div>
 
@@ -117,7 +117,7 @@ const AdminLogin = () => {
               ) : (
                 <>
                   <i className="bi bi-box-arrow-in-right me-2"></i>
-                  Sign In to Admin
+                  Sign In 
                 </>
               )}
             </button>

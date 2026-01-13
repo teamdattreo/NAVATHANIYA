@@ -245,6 +245,9 @@ const Product = (props) => {
                   <p>{product.description}</p>
                   <div className="product-meta">
                     Categories: {product.category ? product.category.name : "General"}
+                    {product.subcategory && product.subcategory.name
+                      ? ` / ${product.subcategory.name}`
+                      : ""}
                   </div>
                 </div>
               </div>

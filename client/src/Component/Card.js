@@ -31,6 +31,11 @@ const Card = ({ product, showViewProductButton = true }) => {
         <p className="product-grid-meta text-muted">
           Added {moment(product.createdAt).fromNow()}
         </p>
+        {product.subcategory && product.subcategory.name && (
+          <p className="product-grid-meta text-muted">
+            {product.category ? product.category.name : "General"} / {product.subcategory.name}
+          </p>
+        )}
         <div className="product-grid-meta-row">
           <div className="product-grid-price">
             <span>Rs.{product.price}</span>

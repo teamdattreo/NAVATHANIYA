@@ -8,6 +8,7 @@ const cloudinary = require("cloudinary").v2;
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
+    .populate("subcategory")
     .exec((err, product) => {
       if (err || !product) {
         return res.status(400).json({
@@ -147,6 +148,7 @@ exports.list = (req, res) => {
   Product.find()
     .select("-photo")
     .populate("category")
+    .populate("subcategory")
     .sort([[sortBy, order]])
     .limit(limit)
     .exec((err, products) => {

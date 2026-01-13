@@ -10,6 +10,7 @@ const AddProduct = () => {
     price: "",
     categories: [],
     category: "",
+    subcategory: "",
     quantity: "",
     tags: [],
     photo: "",
@@ -25,6 +26,7 @@ const AddProduct = () => {
     price,
     categories,
     category,
+    subcategory,
     quantity,
     tags,
     loading,
@@ -71,6 +73,35 @@ const AddProduct = () => {
     setValues({ ...values, [name]: value });
   };
 
+  const getSubcategories = (categoryId) =>
+    categories.filter(
+      (item) => item.super_category && String(item.super_category) === String(categoryId)
+    );
+
+  const parentCategories = categories.filter((item) => !item.super_category);
+
+  useEffect(() => {
+    if (!category) {
+      if (formData) {
+        formData.set("subcategory", "");
+      }
+      setValues((prev) => ({ ...prev, subcategory: "" }));
+      return;
+    }
+    const subs = getSubcategories(category);
+    if (subs.length === 0) {
+      if (formData) {
+        formData.set("subcategory", "");
+      }
+      setValues((prev) => ({ ...prev, subcategory: "" }));
+    } else if (!subs.some((sub) => String(sub._id) === String(subcategory))) {
+      if (formData) {
+        formData.set("subcategory", "");
+      }
+      setValues((prev) => ({ ...prev, subcategory: "" }));
+    }
+  }, [category, categories, formData, subcategory]);
+
   const clickSubmit = (event) => {
     event.preventDefault();
     console.log("Value", values);
@@ -89,6 +120,7 @@ const AddProduct = () => {
           price: "",
           quantity: "",
           tags: [],
+          subcategory: "",
           loading: false,
           error: "",
           createdProduct: data.name,
@@ -159,14 +191,31 @@ const AddProduct = () => {
           required
         >
           <option value="">Select</option>
-          {categories &&
-            categories.map((c, i) => (
-              <option key={i} value={c._id}>
-                {c.name}
-              </option>
-            ))}
+          {parentCategories.map((c, i) => (
+            <option key={i} value={c._id}>
+              {c.name}
+            </option>
+          ))}
         </select>
       </div>
+
+      {getSubcategories(category).length > 0 && (
+        <div className="form-group">
+          <label className="text-muted">Sub Category</label>
+          <select
+            onChange={handleChange("subcategory")}
+            className="form-control"
+            value={subcategory}
+          >
+            <option value="">Select</option>
+            {getSubcategories(category).map((sub) => (
+              <option key={sub._id} value={sub._id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="form-group">
         <label className="text-muted">Quantity</label>
@@ -251,6 +300,7 @@ const AddProduct = () => {
           Back to Dashboard
         </Link>
       </div>
+
 
       <div className="admin-panel">
         {showLoading()}

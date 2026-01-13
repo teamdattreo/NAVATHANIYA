@@ -12,6 +12,7 @@ const UpdateProduct = () => {
     price: "",
     categories: [],
     category: "",
+    subcategory: "",
     quantity: "",
     tags: [],
     photo: "",
@@ -27,6 +28,7 @@ const UpdateProduct = () => {
     price,
     categories,
     category,
+    subcategory,
     tags,
     quantity,
     photo,
@@ -47,6 +49,7 @@ const UpdateProduct = () => {
           description: data.description,
           price: data.price,
           category: data.category?._id || data.category,
+          subcategory: data.subcategory?._id || data.subcategory || "",
           tags: data.tags || [],
           quantity: data.quantity,
           formData: new FormData(),
@@ -75,6 +78,35 @@ const UpdateProduct = () => {
     formData.set(name, value);
     setValues({ ...values, [name]: value });
   };
+
+  const getSubcategories = (categoryId) =>
+    categories.filter(
+      (item) => item.super_category && String(item.super_category) === String(categoryId)
+    );
+
+  const parentCategories = categories.filter((item) => !item.super_category);
+
+  useEffect(() => {
+    if (!category) {
+      if (formData) {
+        formData.set("subcategory", "");
+      }
+      setValues((prev) => ({ ...prev, subcategory: "" }));
+      return;
+    }
+    const subs = getSubcategories(category);
+    if (subs.length === 0) {
+      if (formData) {
+        formData.set("subcategory", "");
+      }
+      setValues((prev) => ({ ...prev, subcategory: "" }));
+    } else if (!subs.some((sub) => String(sub._id) === String(subcategory))) {
+      if (formData) {
+        formData.set("subcategory", "");
+      }
+      setValues((prev) => ({ ...prev, subcategory: "" }));
+    }
+  }, [category, categories, formData, subcategory]);
 
   const addTag = (e) => {
     if (e.key === "Enter") {
@@ -315,12 +347,12 @@ const UpdateProduct = () => {
             </div>
 
             <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">
-                    <i className="bi bi-folder me-2"></i>
-                    Category
-                  </label>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <i className="bi bi-folder me-2"></i>
+                      Category
+                    </label>
                   <select
                     onChange={handleChange("category")}
                     required
@@ -328,22 +360,21 @@ const UpdateProduct = () => {
                     value={category}
                   >
                     <option value="">Select category</option>
-                    {categories &&
-                      categories.map((c, i) => (
-                        <option key={i} value={c._id}>
-                          {c.name}
-                        </option>
-                      ))}
+                    {parentCategories.map((c, i) => (
+                      <option key={i} value={c._id}>
+                        {c.name}
+                      </option>
+                    ))}
                   </select>
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">
-                    <i className="bi bi-box-seam me-2"></i>
-                    Quantity
-                  </label>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <i className="bi bi-box-seam me-2"></i>
+                      Quantity
+                    </label>
                   <input
                     onChange={handleChange("quantity")}
                     type="number"
@@ -354,6 +385,27 @@ const UpdateProduct = () => {
                   />
                 </div>
               </div>
+
+              {getSubcategories(category).length > 0 && (
+                <div className="mb-3">
+                  <label className="form-label">
+                    <i className="bi bi-diagram-2 me-2"></i>
+                    Sub Category
+                  </label>
+                  <select
+                    onChange={handleChange("subcategory")}
+                    className="form-select"
+                    value={subcategory}
+                  >
+                    <option value="">Select sub category</option>
+                    {getSubcategories(category).map((sub) => (
+                      <option key={sub._id} value={sub._id}>
+                        {sub.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="row">
